@@ -9,6 +9,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 SKILLS_SRC="$REPO_DIR/skills"
+OPENCODE_SRC="$REPO_DIR/.opencode"
 
 # Colors
 RED='\033[0;31m'
@@ -68,6 +69,28 @@ install_skills() {
     echo -e "\n  ${GREEN}${BOLD}$count skills installed${NC} → $target_dir"
 }
 
+install_opencode_config() {
+    local target_dir="$1"
+    
+    echo -e "\n${BLUE}Installing OpenCode config to ${BOLD}$target_dir${NC}${BLUE}...${NC}"
+    
+    mkdir -p "$target_dir/commands"
+    mkdir -p "$target_dir/skills"
+    
+    cp -r "$OPENCODE_SRC/commands/"* "$target_dir/commands/"
+    ln -sf "$REPO_DIR/skills" "$target_dir/skills/sdd"
+    
+    local cmd_count
+    cmd_count=$(ls -1 "$OPENCODE_SRC/commands/"*.md 2>/dev/null | wc -l)
+    
+    print_skill "commands/ ($cmd_count slash commands)"
+    print_skill "skills/ → $REPO_DIR/skills"
+    
+    echo -e "\n  ${YELLOW}To enable orchestrator agent, copy manually:${NC}"
+    echo -e "    cp ${OPENCODE_SRC}/opencode.json ${target_dir}/opencode.json"
+    echo -e "  Or create your own orchestrator config at ${target_dir}/opencode.json"
+}
+
 # ============================================================================
 # Main
 # ============================================================================
@@ -92,8 +115,8 @@ case $choice in
         ;;
     2)
         install_skills "$HOME/.opencode/skills" "OpenCode"
-        echo -e "\n${YELLOW}Next step:${NC} Add the orchestrator agent to your ${BOLD}~/.config/opencode/opencode.json${NC}"
-        echo -e "  See: ${CYAN}examples/opencode/opencode.json${NC}"
+        install_opencode_config "$HOME/.config/opencode"
+        echo -e "\n${YELLOW}Next step:${NC} Run ${BOLD}opencode${NC} and use ${CYAN}/sdd:init${NC} in your project"
         ;;
     3)
         install_skills "$HOME/.cursor/skills" "Cursor"
@@ -102,12 +125,18 @@ case $choice in
         ;;
     4)
         install_skills "./skills" "Project-local"
+        mkdir -p "./.opencode/commands"
+        cp -r "$OPENCODE_SRC/commands/"* "./.opencode/commands/"
+        ln -sf "$(pwd)/skills" "./.opencode/skills/sdd"
         echo -e "\n${YELLOW}Note:${NC} Skills installed in ${BOLD}./skills/${NC} — relative to this project"
+        echo -e "Commands installed in ${BOLD}./.opencode/commands/${NC} — for project-local OpenCode"
+        echo -e "\n${YELLOW}To enable orchestrator agent, create ${BOLD}.opencode/opencode.json${NC} with your agent config"
         ;;
     5)
         install_skills "$HOME/.claude/skills" "Claude Code"
         install_skills "$HOME/.opencode/skills" "OpenCode"
         install_skills "$HOME/.cursor/skills" "Cursor"
+        install_opencode_config "$HOME/.config/opencode"
         echo -e "\n${YELLOW}Next steps:${NC}"
         echo -e "  1. Add orchestrator to ${BOLD}~/.claude/CLAUDE.md${NC}"
         echo -e "  2. Add orchestrator agent to ${BOLD}~/.config/opencode/opencode.json${NC}"
