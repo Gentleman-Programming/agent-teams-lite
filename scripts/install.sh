@@ -96,7 +96,7 @@ print_header
 
 echo -e "${BOLD}Select your AI coding assistant:${NC}\n"
 echo "  1) Claude Code    (~/.claude/skills/)"
-echo "  2) OpenCode       (~/.opencode/skills/)"
+echo "  2) OpenCode       (~/.config/opencode/skill/)"
 echo "  3) Cursor         (~/.cursor/skills/)"
 echo "  4) Project-local  (./skills/ in current directory)"
 echo "  5) All global     (Claude Code + OpenCode + Cursor)"
@@ -111,7 +111,7 @@ case $choice in
         echo -e "  See: ${CYAN}examples/claude-code/CLAUDE.md${NC}"
         ;;
     2)
-        install_skills "$HOME/.opencode/skills" "OpenCode"
+        install_skills "$HOME/.config/opencode/skill" "OpenCode"
         install_opencode_commands
         echo -e "\n${YELLOW}Next step:${NC} Add the orchestrator agent to your ${BOLD}~/.config/opencode/opencode.json${NC}"
         echo -e "  See: ${CYAN}examples/opencode/opencode.json${NC}"
@@ -127,7 +127,7 @@ case $choice in
         ;;
     5)
         install_skills "$HOME/.claude/skills" "Claude Code"
-        install_skills "$HOME/.opencode/skills" "OpenCode"
+        install_skills "$HOME/.config/opencode/skill" "OpenCode"
         install_opencode_commands
         install_skills "$HOME/.cursor/skills" "Cursor"
         echo -e "\n${YELLOW}Next steps:${NC}"

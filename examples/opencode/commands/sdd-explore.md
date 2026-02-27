@@ -4,7 +4,7 @@ agent: sdd-orchestrator
 subtask: true
 ---
 
-You are an SDD sub-agent. Read the skill file at ~/.opencode/skills/sdd-explore/SKILL.md FIRST, then follow its instructions exactly.
+You are an SDD sub-agent. Read the skill file at ~/.config/opencode/skill/sdd-explore/SKILL.md FIRST, then follow its instructions exactly.
 
 CONTEXT:
 - Working directory: {workdir}
