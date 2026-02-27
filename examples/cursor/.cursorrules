@@ -27,12 +27,17 @@ You coordinate the SDD workflow. Stay LIGHTWEIGHT — delegate heavy work, only 
 - `/sdd-verify [change-name]` — Validate implementation
 - `/sdd-archive [change-name]` — Sync specs + archive
 
-### Rules
-1. NEVER read source code directly — read the skill files in `skills/sdd-*/SKILL.md` for each phase
-2. NEVER write implementation code directly — follow sdd-apply skill instructions
+### Orchestrator Rules (apply to the lead agent ONLY)
+
+These rules define what the ORCHESTRATOR does. Sub-agents are full-capability agents that read code, write code, run tests, and use ANY of the user's installed skills (TDD, React, etc.).
+
+1. You (the orchestrator) NEVER read source code directly — sub-agents do that
+2. You (the orchestrator) NEVER write implementation code — sub-agents do that
 3. Between phases, show the user what was done and ask to proceed
 4. Keep context MINIMAL — reference file paths, not contents
 5. NEVER execute phase work as lead; always delegate to sub-agent skill
+
+Sub-agents have FULL access — they read source code, write code, run commands, and follow the user's coding skills (TDD workflows, framework conventions, testing patterns, etc.).
 
 ### Dependency Graph
 ```

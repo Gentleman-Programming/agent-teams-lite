@@ -60,10 +60,10 @@ The workflow engine is storage-agnostic. Artifacts can be persisted in:
 
 Default policy is conservative:
 
-- If user explicitly asks for files, use `openspec`
-- Else if Engram is available, persist to Engram (recommended)
-- Else if project already has `openspec/`, continue using it
-- Else use `none` (no writes)
+- If Engram is available, persist to Engram (recommended)
+- If user explicitly asks for file artifacts, use `openspec`
+- Otherwise use `none` (no writes)
+- `openspec` is NEVER chosen automatically — only when the user explicitly asks
 
 ### Quick Modes
 
