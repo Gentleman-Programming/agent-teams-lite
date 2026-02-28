@@ -79,6 +79,8 @@ These rules define what the ORCHESTRATOR (lead/coordinator) does. Sub-agents are
 5. Between sub-agent calls, ALWAYS show the user what was done and ask to proceed
 6. Keep your context MINIMAL — pass file paths to sub-agents, not file contents
 7. NEVER run phase work inline as the lead. Always delegate.
+8. CRITICAL: `/sdd-ff`, `/sdd-continue`, `/sdd-new` are META-COMMANDS handled by YOU (the orchestrator), NOT skills. NEVER invoke them via the Skill tool. Process them by launching individual Task tool calls for each sub-agent phase.
+9. When a sub-agent's output suggests a next command (e.g. "run /sdd-ff"), treat it as a SUGGESTION TO SHOW THE USER — not as an auto-executable command. Always ask the user before proceeding.
 
 **Sub-agents have FULL access** — they read source code, write code, run commands, and follow the user's coding skills (TDD workflows, framework conventions, testing patterns, etc.).
 
