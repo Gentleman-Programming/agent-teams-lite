@@ -195,13 +195,13 @@ test_claude_code_skill_count() {
 
 test_install_opencode() {
     bash "$INSTALL_SCRIPT" --agent opencode > /dev/null 2>&1
-    assert_all_skills_installed "$HOME/.config/opencode/skill"
+    assert_all_skills_installed "$HOME/.config/opencode/skills"
 }
 
 test_opencode_skill_count() {
     bash "$INSTALL_SCRIPT" --agent opencode > /dev/null 2>&1
     local count
-    count=$(find "$HOME/.config/opencode/skill" -name "SKILL.md" | wc -l | tr -d ' ')
+    count=$(find "$HOME/.config/opencode/skills" -name "SKILL.md" | wc -l | tr -d ' ')
     assert_eq "9" "$count" "Expected exactly 9 skills for OpenCode"
 }
 
@@ -353,7 +353,7 @@ test_all_global() {
     # Claude Code
     assert_all_skills_installed "$HOME/.claude/skills" || return 1
     # OpenCode
-    assert_all_skills_installed "$HOME/.config/opencode/skill" || return 1
+    assert_all_skills_installed "$HOME/.config/opencode/skills" || return 1
     # Gemini CLI
     assert_all_skills_installed "$HOME/.gemini/skills" || return 1
     # Codex
@@ -368,7 +368,7 @@ test_all_global_total_skill_count() {
     local total=0
     for dir in \
         "$HOME/.claude/skills" \
-        "$HOME/.config/opencode/skill" \
+        "$HOME/.config/opencode/skills" \
         "$HOME/.gemini/skills" \
         "$HOME/.codex/skills" \
         "$HOME/.cursor/skills"; do
@@ -405,9 +405,9 @@ test_idempotent_claude_code() {
 test_idempotent_opencode() {
     bash "$INSTALL_SCRIPT" --agent opencode > /dev/null 2>&1
     bash "$INSTALL_SCRIPT" --agent opencode > /dev/null 2>&1
-    assert_all_skills_installed "$HOME/.config/opencode/skill" || return 1
+    assert_all_skills_installed "$HOME/.config/opencode/skills" || return 1
     local skill_count
-    skill_count=$(find "$HOME/.config/opencode/skill" -name "SKILL.md" | wc -l | tr -d ' ')
+    skill_count=$(find "$HOME/.config/opencode/skills" -name "SKILL.md" | wc -l | tr -d ' ')
     assert_eq "9" "$skill_count" "Expected exactly 9 skills after double install" || return 1
     local cmd_count
     cmd_count=$(find "$HOME/.config/opencode/commands" -name "sdd-*.md" | wc -l | tr -d ' ')
@@ -419,7 +419,7 @@ test_idempotent_all_global() {
     bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1
     for dir in \
         "$HOME/.claude/skills" \
-        "$HOME/.config/opencode/skill" \
+        "$HOME/.config/opencode/skills" \
         "$HOME/.gemini/skills" \
         "$HOME/.codex/skills" \
         "$HOME/.cursor/skills"; do
@@ -597,7 +597,7 @@ run_test "Exactly 9 SKILL.md files" test_claude_code_skill_count
 echo ""
 
 echo -e "${BOLD}OpenCode${NC}"
-run_test "Installs all 9 skills to ~/.config/opencode/skill" test_install_opencode
+run_test "Installs all 9 skills to ~/.config/opencode/skills" test_install_opencode
 run_test "Exactly 9 SKILL.md files" test_opencode_skill_count
 run_test "Installs 8 command files" test_opencode_commands
 echo ""
