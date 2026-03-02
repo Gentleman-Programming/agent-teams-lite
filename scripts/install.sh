@@ -181,6 +181,25 @@ show_help() {
 # Install functions
 # ============================================================================
 
+validate_source() {
+    local missing=0
+    for skill_dir in "$SKILLS_SRC"/sdd-*/; do
+        if [ ! -f "$skill_dir/SKILL.md" ]; then
+            print_error "Missing: $(basename "$skill_dir")/SKILL.md"
+            missing=$((missing + 1))
+        fi
+    done
+    if [ ! -d "$SKILLS_SRC/_shared" ]; then
+        print_error "Missing: _shared/ directory"
+        missing=$((missing + 1))
+    fi
+    if [ "$missing" -gt 0 ]; then
+        echo -e "\n${RED}${BOLD}Source validation failed.${NC} Is this a complete clone of the repository?"
+        echo -e "  Try: ${CYAN}git clone https://github.com/Gentleman-Programming/agent-teams-lite.git${NC}\n"
+        exit 1
+    fi
+}
+
 install_skills() {
     local target_dir="$1"
     local tool_name="$2"
@@ -194,17 +213,34 @@ install_skills() {
     local shared_target="$target_dir/_shared"
 
     if [ -d "$shared_src" ]; then
+        local shared_count=0
         mkdir -p "$shared_target" 2>/dev/null || {
             make_writable "$shared_target"
         }
-        cp "$shared_src"/*.md "$shared_target/" 2>/dev/null || true
-        print_skill "_shared (convention files)"
+        for shared_file in "$shared_src"/*.md; do
+            if [ -f "$shared_file" ]; then
+                cp "$shared_file" "$shared_target/" 
+                shared_count=$((shared_count + 1))
+            fi
+        done
+        if [ "$shared_count" -gt 0 ]; then
+            print_skill "_shared ($shared_count convention files)"
+        else
+            print_warn "_shared directory found but no .md files to copy"
+        fi
     fi
 
     local count=0
     for skill_dir in "$SKILLS_SRC"/sdd-*/; do
         local skill_name
         skill_name=$(basename "$skill_dir")
+
+        # Verify source SKILL.md exists before creating target directory
+        if [ ! -f "$skill_dir/SKILL.md" ]; then
+            print_warn "Skipping $skill_name (SKILL.md not found in source)"
+            continue
+        fi
+
         mkdir -p "$target_dir/$skill_name" 2>/dev/null || {
             make_writable "$target_dir/$skill_name"
         }
@@ -255,7 +291,17 @@ install_for_agent() {
         opencode)
             install_skills "$(get_tool_path opencode)" "OpenCode"
             install_opencode_commands
-            print_next_step "~/.config/opencode/opencode.json" "examples/opencode/opencode.json"
+            echo ""
+            echo -e "${YELLOW}${BOLD}╔══════════════════════════════════════════════════════════════╗${NC}"
+            echo -e "${YELLOW}${BOLD}║  ACTION REQUIRED: Add the sdd-orchestrator agent config     ║${NC}"
+            echo -e "${YELLOW}${BOLD}║                                                              ║${NC}"
+            echo -e "${YELLOW}${BOLD}║  Copy the agent block from:                                  ║${NC}"
+            echo -e "${YELLOW}${BOLD}║    examples/opencode/opencode.json                           ║${NC}"
+            echo -e "${YELLOW}${BOLD}║  Into your:                                                  ║${NC}"
+            echo -e "${YELLOW}${BOLD}║    ~/.config/opencode/opencode.json                          ║${NC}"
+            echo -e "${YELLOW}${BOLD}║                                                              ║${NC}"
+            echo -e "${YELLOW}${BOLD}║  Without this, /sdd-* commands will not find the agent.      ║${NC}"
+            echo -e "${YELLOW}${BOLD}╚══════════════════════════════════════════════════════════════╝${NC}"
             ;;
         gemini-cli)
             install_skills "$(get_tool_path gemini-cli)" "Gemini CLI"
@@ -292,7 +338,8 @@ install_for_agent() {
             install_skills "$(get_tool_path cursor)" "Cursor"
             echo -e "\n${YELLOW}Next steps:${NC}"
             echo -e "  1. Add orchestrator to ${BOLD}~/.claude/CLAUDE.md${NC}"
-            echo -e "  2. Add orchestrator agent to ${BOLD}~/.config/opencode/opencode.json${NC}"
+            echo -e "  2. ${YELLOW}${BOLD}[REQUIRED]${NC} Add orchestrator agent to ${BOLD}~/.config/opencode/opencode.json${NC}"
+            echo -e "     ${YELLOW}See: examples/opencode/opencode.json — without this, /sdd-* commands won't work${NC}"
             echo -e "  3. Add orchestrator to ${BOLD}~/.gemini/GEMINI.md${NC}"
             echo -e "  4. Add orchestrator to ${BOLD}Codex instructions file${NC}"
             echo -e "  5. Add SDD rules to ${BOLD}.cursorrules${NC}"
@@ -372,6 +419,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 print_header
+validate_source
 
 if [[ -n "$AGENT" ]]; then
     # Non-interactive mode

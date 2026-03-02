@@ -129,6 +129,29 @@ function Show-Usage {
 # Install Functions
 # ============================================================================
 
+function Test-SourceTree {
+    $missing = 0
+    $skillDirs = Get-ChildItem -Path $SkillsSrc -Directory -Filter 'sdd-*'
+    foreach ($skillDir in $skillDirs) {
+        $skillFile = Join-Path $skillDir.FullName 'SKILL.md'
+        if (-not (Test-Path $skillFile)) {
+            Write-Err "Missing: $($skillDir.Name)/SKILL.md"
+            $missing++
+        }
+    }
+    if (-not (Test-Path (Join-Path $SkillsSrc '_shared'))) {
+        Write-Err 'Missing: _shared/ directory'
+        $missing++
+    }
+    if ($missing -gt 0) {
+        Write-Host ''
+        Write-Host 'Source validation failed. Is this a complete clone of the repository?' -ForegroundColor Red
+        Write-Host "  Try: git clone https://github.com/Gentleman-Programming/agent-teams-lite.git" -ForegroundColor Cyan
+        Write-Host ''
+        exit 1
+    }
+}
+
 function Install-Skills {
     param(
         [string]$TargetDir,
@@ -149,10 +172,16 @@ function Install-Skills {
     if (Test-Path $sharedSrc) {
         New-Item -ItemType Directory -Path $sharedTarget -Force | Out-Null
         $sharedFiles = Get-ChildItem -Path $sharedSrc -Filter '*.md'
+        $sharedCount = 0
         foreach ($file in $sharedFiles) {
             Copy-Item -Path $file.FullName -Destination $sharedTarget -Force
+            $sharedCount++
         }
-        Write-Skill '_shared (convention files)'
+        if ($sharedCount -gt 0) {
+            Write-Skill "_shared ($sharedCount convention files)"
+        } else {
+            Write-Warn "_shared directory found but no .md files to copy"
+        }
     }
 
     $count = 0
@@ -163,6 +192,7 @@ function Install-Skills {
         $skillFile = Join-Path $skillDir.FullName 'SKILL.md'
 
         if (-not (Test-Path $skillFile)) {
+            Write-Warn "Skipping $skillName (SKILL.md not found in source)"
             continue
         }
 
@@ -221,7 +251,17 @@ function Install-ForAgent {
         'opencode' {
             Install-Skills -TargetDir $ToolPaths['opencode'] -ToolName 'OpenCode'
             Install-OpenCodeCommands
-            Write-NextStep "$env:APPDATA\opencode\opencode.json" 'examples\opencode\opencode.json'
+            Write-Host ''
+            Write-Host ([char]0x2554 + ([string][char]0x2550 * 62) + [char]0x2557) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + '  ACTION REQUIRED: Add the sdd-orchestrator agent config     ' + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + '                                                              ' + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + '  Copy the agent block from:                                  ' + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + '    examples\opencode\opencode.json                           ' + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + '  Into your:                                                  ' + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + "    $env:APPDATA\opencode\opencode.json                       " + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + '                                                              ' + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + '  Without this, /sdd-* commands will not find the agent.      ' + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x255A + ([string][char]0x2550 * 62) + [char]0x255D) -ForegroundColor Yellow
         }
         'gemini-cli' {
             Install-Skills -TargetDir $ToolPaths['gemini-cli'] -ToolName 'Gemini CLI'
@@ -260,8 +300,11 @@ function Install-ForAgent {
             Write-Host 'Next steps:' -ForegroundColor Yellow
             Write-Host '  1. Add orchestrator to ' -NoNewline
             Write-Host '~\.claude\CLAUDE.md' -ForegroundColor White
-            Write-Host '  2. Add orchestrator agent to ' -NoNewline
+            Write-Host '  2. ' -NoNewline
+            Write-Host '[REQUIRED] ' -ForegroundColor Yellow -NoNewline
+            Write-Host 'Add orchestrator agent to ' -NoNewline
             Write-Host "$env:APPDATA\opencode\opencode.json" -ForegroundColor White
+            Write-Host '     See: examples\opencode\opencode.json — without this, /sdd-* commands will not work' -ForegroundColor Yellow
             Write-Host '  3. Add orchestrator to ' -NoNewline
             Write-Host '~\.gemini\GEMINI.md' -ForegroundColor White
             Write-Host '  4. Add orchestrator to ' -NoNewline
@@ -343,6 +386,7 @@ try {
     }
 
     Write-Header
+    Test-SourceTree
 
     if ($Agent) {
         Install-ForAgent $Agent
