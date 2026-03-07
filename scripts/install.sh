@@ -75,14 +75,14 @@ get_tool_path() {
             ;;
         opencode)
             case "$OS" in
-                windows)  echo "$APPDATA/opencode/skills" ;;
+                windows)  echo "$USERPROFILE/.config/opencode/skills" ;;
                 macos)    echo "$HOME/.config/opencode/skills" ;;
                 *)        echo "$HOME/.config/opencode/skills" ;;
             esac
             ;;
         opencode-commands)
             case "$OS" in
-                windows)  echo "$APPDATA/opencode/commands" ;;
+                windows)  echo "$USERPROFILE/.config/opencode/commands" ;;
                 macos)    echo "$HOME/.config/opencode/commands" ;;
                 *)        echo "$HOME/.config/opencode/commands" ;;
             esac

@@ -41,8 +41,8 @@ $SkillsSrc = Join-Path $RepoDir 'skills'
 
 $ToolPaths = @{
     'claude-code'       = Join-Path $env:USERPROFILE '.claude\skills'
-    'opencode'          = Join-Path $env:APPDATA 'opencode\skills'
-    'opencode-commands' = Join-Path $env:APPDATA 'opencode\commands'
+    'opencode'          = Join-Path $env:USERPROFILE '.config\opencode\skills'
+    'opencode-commands' = Join-Path $env:USERPROFILE '.config\opencode\commands'
     'gemini-cli'        = Join-Path $env:USERPROFILE '.gemini\skills'
     'codex'             = Join-Path $env:USERPROFILE '.codex\skills'
     'vscode'            = Join-Path '.' '.vscode\skills'
@@ -258,7 +258,7 @@ function Install-ForAgent {
             Write-Host ([char]0x2551 + '  Copy the agent block from:                                  ' + [char]0x2551) -ForegroundColor Yellow
             Write-Host ([char]0x2551 + '    examples\opencode\opencode.json                           ' + [char]0x2551) -ForegroundColor Yellow
             Write-Host ([char]0x2551 + '  Into your:                                                  ' + [char]0x2551) -ForegroundColor Yellow
-            Write-Host ([char]0x2551 + "    $env:APPDATA\opencode\opencode.json                       " + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + "    $env:USERPROFILE\.config\opencode\opencode.json          " + [char]0x2551) -ForegroundColor Yellow
             Write-Host ([char]0x2551 + '                                                              ' + [char]0x2551) -ForegroundColor Yellow
             Write-Host ([char]0x2551 + '  Without this, /sdd-* commands will not find the agent.      ' + [char]0x2551) -ForegroundColor Yellow
             Write-Host ([char]0x255A + ([string][char]0x2550 * 62) + [char]0x255D) -ForegroundColor Yellow
@@ -303,7 +303,7 @@ function Install-ForAgent {
             Write-Host '  2. ' -NoNewline
             Write-Host '[REQUIRED] ' -ForegroundColor Yellow -NoNewline
             Write-Host 'Add orchestrator agent to ' -NoNewline
-            Write-Host "$env:APPDATA\opencode\opencode.json" -ForegroundColor White
+            Write-Host "$env:USERPROFILE\.config\opencode\opencode.json" -ForegroundColor White
             Write-Host '     See: examples\opencode\opencode.json — without this, /sdd-* commands will not work' -ForegroundColor Yellow
             Write-Host '  3. Add orchestrator to ' -NoNewline
             Write-Host '~\.gemini\GEMINI.md' -ForegroundColor White
