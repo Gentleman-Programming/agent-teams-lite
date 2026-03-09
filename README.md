@@ -14,6 +14,7 @@
   <a href="#how-it-works">How It Works</a> &bull;
   <a href="#commands">Commands</a> &bull;
   <a href="#installation">Installation</a> &bull;
+  <a href="#releases">Releases</a> &bull;
   <a href="#supported-tools">Supported Tools</a>
 </p>
 
@@ -306,6 +307,18 @@ Or let it detect automatically — describe a substantial feature and the orches
 
 ---
 
+## Releases
+
+We publish versioned release notes on GitHub:
+
+- https://github.com/Gentleman-Programming/agent-teams-lite/releases
+
+Latest release:
+
+- `v3.0.5` — Lean orchestrator prompts across all agents, reduced always-loaded prompt footprint, and standardized `_shared` install steps.
+
+---
+
 ## Commands
 
 | Command | What It Does |
@@ -417,12 +430,14 @@ Dedicated setup guides for all supported tools:
 ./scripts/install.sh  # Choose option 1: Claude Code
 
 # Or manually
-cp -r skills/sdd-* ~/.claude/skills/
+cp -r skills/_shared skills/sdd-* ~/.claude/skills/
 ```
 
 **2. Add orchestrator to `~/.claude/CLAUDE.md`:**
 
 Append the contents of [`examples/claude-code/CLAUDE.md`](examples/claude-code/CLAUDE.md) to your existing `CLAUDE.md`.
+
+The example is intentionally lean to avoid token bloat in always-loaded system prompts. Detailed persistence and artifact rules live in `~/.claude/skills/_shared/*.md`.
 
 This keeps your existing assistant identity and adds SDD as an orchestration overlay.
 
@@ -447,7 +462,7 @@ Open Claude Code and type `/sdd-init` — it should recognize the command.
 ./scripts/install.sh  # Choose option 2: OpenCode
 
 # Or manually
-cp -r skills/sdd-* ~/.config/opencode/skills/
+cp -r skills/_shared skills/sdd-* ~/.config/opencode/skills/
 cp examples/opencode/commands/sdd-*.md ~/.config/opencode/commands/
 ```
 
@@ -486,7 +501,7 @@ How to use in OpenCode:
 ./scripts/install.sh  # Choose Gemini CLI option
 
 # Or manually
-cp -r skills/sdd-* ~/.gemini/skills/
+cp -r skills/_shared skills/sdd-* ~/.gemini/skills/
 ```
 
 **2. Add orchestrator to `~/.gemini/GEMINI.md`:**
@@ -512,7 +527,7 @@ Open Gemini CLI and type `/sdd-init` — it should recognize the command.
 ./scripts/install.sh  # Choose Codex option
 
 # Or manually
-cp -r skills/sdd-* ~/.codex/skills/
+cp -r skills/_shared skills/sdd-* ~/.codex/skills/
 ```
 
 **2. Add orchestrator instructions:**
@@ -535,7 +550,7 @@ VS Code supports MCP and custom instructions natively. The skills work with Copi
 
 ```bash
 # Per-project (recommended)
-cp -r skills/sdd-* ./your-project/.vscode/skills/
+cp -r skills/_shared skills/sdd-* ./your-project/.vscode/skills/
 
 # Or using the install script
 ./scripts/install.sh  # Choose VS Code option
@@ -579,11 +594,11 @@ Open VS Code, open the Chat panel (Ctrl+Cmd+I / Ctrl+Alt+I), and type `/sdd-init
 ./scripts/install.sh  # Choose Antigravity option
 
 # Or manually (global)
-cp -r skills/sdd-* ~/.gemini/antigravity/skills/
+cp -r skills/_shared skills/sdd-* ~/.gemini/antigravity/skills/
 
 # Workspace-specific (per project)
 mkdir -p .agent/skills
-cp -r skills/sdd-* .agent/skills/
+cp -r skills/_shared skills/sdd-* .agent/skills/
 ```
 
 **2. Add orchestrator instructions:**
@@ -609,7 +624,7 @@ Open Antigravity and type `/sdd-init` in the agent panel.
 ./scripts/install.sh  # Choose option 3: Cursor
 
 # Or per-project
-cp -r skills/sdd-* ./your-project/skills/
+cp -r skills/_shared skills/sdd-* ./your-project/skills/
 ```
 
 **2. Add orchestrator to `.cursorrules`:**
