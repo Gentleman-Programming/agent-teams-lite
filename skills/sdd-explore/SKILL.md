@@ -103,16 +103,37 @@ If there are multiple approaches, compare them:
 | Option A | ... | ... | Low/Med/High |
 | Option B | ... | ... | Low/Med/High |
 
-### Step 4: Optionally Save Exploration
+### Step 4: Persist Artifact
 
-If the orchestrator provided a change name (i.e., this exploration is part of `/sdd-new`), save your analysis to:
+**This step is MANDATORY when tied to a named change — do NOT skip it.**
 
+If mode is `engram` and this exploration is tied to a change:
 ```
-openspec/changes/{change-name}/
-└── exploration.md          ← You create this
+mem_save(
+  title: "sdd/{change-name}/explore",
+  topic_key: "sdd/{change-name}/explore",
+  type: "architecture",
+  project: "{project}",
+  content: "{your full exploration markdown from Step 3}"
+)
 ```
 
-If no change name was provided (standalone `/sdd-explore`), skip file creation — just return the analysis.
+If standalone (no change name), persistence is optional but recommended:
+```
+mem_save(
+  title: "sdd/explore/{topic-slug}",
+  topic_key: "sdd/explore/{topic-slug}",
+  type: "architecture",
+  project: "{project}",
+  content: "{your full exploration markdown}"
+)
+```
+
+If mode is `openspec` or `hybrid`: the file was already written in Step 3.
+
+If mode is `hybrid`: also call `mem_save` as above (write to BOTH backends).
+
+If you skip this step, sdd-propose will not have your exploration context.
 
 ### Step 5: Return Structured Analysis
 

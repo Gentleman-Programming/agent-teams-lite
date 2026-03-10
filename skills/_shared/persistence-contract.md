@@ -77,25 +77,79 @@ When launching a sub-agent, the orchestrator MUST include persistence instructio
 
 **Non-SDD**:
 ```
-If you make important discoveries, decisions, or fix bugs, save them to engram
-via mem_save with project: '{project}'.
+PERSISTENCE (MANDATORY):
+If you make important discoveries, decisions, or fix bugs, you MUST save them
+to engram before returning:
+  mem_save(title: "{short description}", type: "{decision|bugfix|discovery|pattern}",
+           project: "{project}", content: "{What, Why, Where, Learned}")
+Do NOT return without saving what you learned. This is how the team builds
+persistent knowledge across sessions.
 ```
 
 **SDD (with dependencies)**:
 ```
 Artifact store mode: {engram|openspec|hybrid|none}
-Read these artifacts before starting:
-- {topic_key or file_path for each dependency}
-After completing your work, persist your artifact following the conventions
-in ~/.claude/skills/_shared/{engram|openspec}-convention.md.
+Read these artifacts before starting (two-step — search results are TRUNCATED):
+  mem_search(query: "sdd/{change-name}/{type}", project: "{project}") → get ID
+  mem_get_observation(id: {id}) → full content (REQUIRED)
+
+PERSISTENCE (MANDATORY — do NOT skip):
+After completing your work, you MUST call:
+  mem_save(
+    title: "sdd/{change-name}/{artifact-type}",
+    topic_key: "sdd/{change-name}/{artifact-type}",
+    type: "architecture",
+    project: "{project}",
+    content: "{your full artifact markdown}"
+  )
+If you return without calling mem_save, the next phase CANNOT find your artifact
+and the pipeline BREAKS.
 ```
 
 **SDD (no dependencies)**:
 ```
 Artifact store mode: {engram|openspec|hybrid|none}
-After completing your work, persist your artifact following the conventions
-in ~/.claude/skills/_shared/{engram|openspec}-convention.md.
+
+PERSISTENCE (MANDATORY — do NOT skip):
+After completing your work, you MUST call:
+  mem_save(
+    title: "sdd/{change-name}/{artifact-type}",
+    topic_key: "sdd/{change-name}/{artifact-type}",
+    type: "architecture",
+    project: "{project}",
+    content: "{your full artifact markdown}"
+  )
+If you return without calling mem_save, the next phase CANNOT find your artifact
+and the pipeline BREAKS.
 ```
+
+## Skill Registry
+
+`sdd-init` generates a skill registry in engram (`topic_key: "skill-registry"`) that lists all available coding skills with their triggers and file paths. This enables sub-agents to discover and load relevant skills for their task.
+
+### Sub-agent skill loading protocol
+
+Every sub-agent that writes or modifies code SHOULD check for coding skills before starting:
+
+```
+1. mem_search(query: "skill-registry", project: "{project}") → get ID
+2. If found: mem_get_observation(id) → read the registry table
+3. Identify skills whose triggers match your task (e.g., React, TypeScript, testing)
+4. Read those specific SKILL.md files BEFORE writing code
+5. Follow their patterns and conventions
+```
+
+The orchestrator MUST include this instruction in sub-agent prompts that involve code writing:
+```
+SKILL LOADING:
+Before writing code, check for coding skills:
+  mem_search(query: "skill-registry", project: "{project}")
+If found, load and follow any skills relevant to your task.
+```
+
+### When the registry doesn't exist
+
+If `mem_search` returns no results (sdd-init hasn't been run), the sub-agent proceeds without coding skills. This is not an error — skills are optional enhancement, not a requirement.
 
 ## Detail Level
 

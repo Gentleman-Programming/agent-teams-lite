@@ -62,6 +62,15 @@ proposal -> specs --> tasks -> apply -> verify -> archive
 ### Result Contract
 Each phase returns: `status`, `executive_summary`, `artifacts`, `next_recommended`, `risks`.
 
+### Sub-Agent Launch Pattern
+Include a SKILL LOADING section in the sub-agent prompt (between TASK and PERSISTENCE):
+```
+  SKILL LOADING:
+  Before writing code, check for coding skills:
+    mem_search(query: "skill-registry", project: "{project}")
+  If found, load and follow any skills relevant to your task.
+```
+
 ### Sub-Agent Context Protocol
 
 Sub-agents get a fresh context with NO memory. The orchestrator controls context access.

@@ -107,7 +107,26 @@ Confirm:
 - [ ] Archive contains all artifacts (proposal, specs, design, tasks)
 - [ ] Active changes directory no longer has this change
 
-### Step 4: Return Summary
+### Step 4: Persist Archive Report
+
+**This step is MANDATORY — do NOT skip it.**
+
+If mode is `engram`:
+```
+mem_save(
+  title: "sdd/{change-name}/archive-report",
+  topic_key: "sdd/{change-name}/archive-report",
+  type: "architecture",
+  project: "{project}",
+  content: "{your archive report with all observation IDs for lineage}"
+)
+```
+
+If mode is `openspec` or `hybrid`: the file was already written in Step 2.
+
+If mode is `hybrid`: also call `mem_save` as above (write to BOTH backends).
+
+### Step 5: Return Summary
 
 Return to the orchestrator:
 

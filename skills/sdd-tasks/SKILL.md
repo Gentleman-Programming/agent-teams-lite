@@ -135,7 +135,28 @@ Phase 5: Cleanup (if needed)
   └─ Documentation, remove dead code, polish
 ```
 
-### Step 3: Return Summary
+### Step 3: Persist Artifact
+
+**This step is MANDATORY — do NOT skip it.**
+
+If mode is `engram`:
+```
+mem_save(
+  title: "sdd/{change-name}/tasks",
+  topic_key: "sdd/{change-name}/tasks",
+  type: "architecture",
+  project: "{project}",
+  content: "{your full tasks markdown from Step 2}"
+)
+```
+
+If mode is `openspec` or `hybrid`: the file was already written in Step 2.
+
+If mode is `hybrid`: also call `mem_save` as above (write to BOTH backends).
+
+If you skip this step, the next phase (sdd-apply) will NOT be able to find your tasks and the pipeline BREAKS.
+
+### Step 4: Return Summary
 
 Return to the orchestrator:
 

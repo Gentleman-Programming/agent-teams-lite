@@ -122,6 +122,14 @@ When launching a phase, require the sub-agent to read `~/.claude/skills/sdd-{pha
 - `next_recommended`
 - `risks`
 
+Include a SKILL LOADING section in the sub-agent prompt (between TASK and PERSISTENCE):
+```
+  SKILL LOADING:
+  Before writing code, check for coding skills:
+    mem_search(query: "skill-registry", project: "{project}")
+  If found, load and follow any skills relevant to your task.
+```
+
 ### State & Conventions (source of truth)
 Keep this file lean. Do NOT inline full persistence and naming specs here.
 

@@ -134,7 +134,28 @@ If not applicable, state "No migration required."}
 - [ ] {Any decision that needs team input}
 ```
 
-### Step 3: Return Summary
+### Step 3: Persist Artifact
+
+**This step is MANDATORY — do NOT skip it.**
+
+If mode is `engram`:
+```
+mem_save(
+  title: "sdd/{change-name}/design",
+  topic_key: "sdd/{change-name}/design",
+  type: "architecture",
+  project: "{project}",
+  content: "{your full design markdown from Step 2}"
+)
+```
+
+If mode is `openspec` or `hybrid`: the file was already written in Step 2.
+
+If mode is `hybrid`: also call `mem_save` as above (write to BOTH backends).
+
+If you skip this step, the next phase (sdd-tasks) will NOT be able to find your design and the pipeline BREAKS.
+
+### Step 4: Return Summary
 
 Return to the orchestrator:
 

@@ -154,7 +154,33 @@ Update `tasks.md` — change `- [ ]` to `- [x]` for completed tasks:
 - [ ] 1.3 Add auth routes to `internal/server/server.go`  ← still pending
 ```
 
-### Step 4: Return Summary
+### Step 4: Persist Progress
+
+**This step is MANDATORY — do NOT skip it.**
+
+If mode is `engram`:
+1. Update the tasks artifact with completion marks:
+   ```
+   mem_update(id: {tasks-observation-id}, content: "{updated tasks with [x] marks}")
+   ```
+2. Save progress report:
+   ```
+   mem_save(
+     title: "sdd/{change-name}/apply-progress",
+     topic_key: "sdd/{change-name}/apply-progress",
+     type: "architecture",
+     project: "{project}",
+     content: "{your implementation progress report}"
+   )
+   ```
+
+If mode is `openspec` or `hybrid`: tasks.md was already updated in Step 3.
+
+If mode is `hybrid`: also call `mem_save` and `mem_update` as above.
+
+If you skip this step, sdd-verify will NOT be able to find your progress and the pipeline BREAKS.
+
+### Step 5: Return Summary
 
 Return to the orchestrator:
 
@@ -207,7 +233,7 @@ If none, say "None."}
 - If you discover the design is wrong or incomplete, NOTE IT in your return summary — don't silently deviate
 - If a task is blocked by something unexpected, STOP and report back
 - NEVER implement tasks that weren't assigned to you
-- Load and follow any relevant coding skills for the project stack (e.g., react-19, typescript, django-drf, tdd, pytest, vitest) if available in the user's skill set
+- **BEFORE writing any code**, check for coding skills: `mem_search(query: "skill-registry", project: "{project}")`. If found, read it and load any skills whose triggers match your task (e.g., React → react-19, TypeScript → typescript, tests → pytest/playwright). Follow their patterns strictly.
 - Apply any `rules.apply` from `openspec/config.yaml`
 - If TDD mode is detected (Step 2), ALWAYS follow the RED → GREEN → REFACTOR cycle — never skip RED (writing the failing test first)
 - When running tests during TDD, run ONLY the relevant test file/suite, not the entire test suite (for speed)

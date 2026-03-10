@@ -96,7 +96,79 @@ rules:
     - Warn before merging destructive deltas (large removals)
 ```
 
-### Step 4: Return Summary
+### Step 4: Build Skill Registry
+
+Build a registry of available skills so sub-agents can discover and load them. Scan TWO sources:
+
+#### A. User Coding Skills
+
+1. Glob for `*/SKILL.md` files in the user's skills directory (try `~/.claude/skills/`, `~/.config/opencode/skills/`, or the parent directory of this skill file)
+2. **SKIP `sdd-*` and `_shared`** — those are SDD workflow skills, not coding skills
+3. Read only the frontmatter (first 10 lines) to extract the `description` field
+4. Extract the trigger text (after "Trigger:" in the description)
+
+#### B. Project Conventions Index
+
+1. Check the project root for a conventions index file. Look for (in priority order):
+   - `agents.md`
+   - `AGENTS.md`
+   - `CLAUDE.md` (only if it's a project-level file, not the user's global one)
+   - `.cursorrules`
+   - `GEMINI.md`
+   - `copilot-instructions.md`
+2. If found, record its path — this file is the project's master skill/convention index
+
+#### C. Save the Registry
+
+```
+mem_save(
+  title: "skill-registry",
+  topic_key: "skill-registry",
+  type: "config",
+  project: "{project-name}",
+  content: "# Skill Registry
+
+Available skills for sub-agents. Load relevant ones BEFORE writing code.
+
+## User Coding Skills
+| Trigger | Skill | Path |
+|---------|-------|------|
+| React components, hooks, JSX | react-19 | ~/.claude/skills/react-19/SKILL.md |
+| TypeScript types, interfaces | typescript | ~/.claude/skills/typescript/SKILL.md |
+| ... | ... | ... |
+
+## Project Conventions
+| File | Path | Description |
+|------|------|-------------|
+| agents.md | ./agents.md | Project master index — read for project-specific conventions |
+"
+)
+```
+
+`topic_key: "skill-registry"` ensures this upserts — re-running sdd-init updates the same observation.
+
+If no coding skills or project index are found, save an empty registry (so sub-agents don't waste time searching).
+
+### Step 5: Persist Project Context
+
+**This step is MANDATORY — do NOT skip it.**
+
+If mode is `engram`:
+```
+mem_save(
+  title: "sdd-init/{project-name}",
+  topic_key: "sdd-init/{project-name}",
+  type: "architecture",
+  project: "{project-name}",
+  content: "{your detected project context from Steps 1-4}"
+)
+```
+
+If mode is `openspec` or `hybrid`: the config was already written in Step 3.
+
+If mode is `hybrid`: also call `mem_save` as above (write to BOTH backends).
+
+### Step 6: Return Summary
 
 Return a structured summary adapted to the resolved mode:
 
