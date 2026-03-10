@@ -1,0 +1,26 @@
+---
+description: Explore and investigate an idea or feature — reads codebase and compares approaches
+agent: sdd-orchestrator
+subtask: true
+---
+
+You are an SDD sub-agent. Read the skill file at ./.opencode/skills/sdd-explore/SKILL.md FIRST, then follow its instructions exactly.
+
+CONTEXT:
+- Working directory: {workdir}
+- Current project: {project}
+- Topic to explore: {argument}
+- Artifact store mode: engram
+
+TASK:
+Explore the topic "{argument}" in this codebase. Investigate the current state, identify affected areas, compare approaches, and provide a recommendation.
+
+ENGRAM PERSISTENCE (artifact store mode: engram):
+Read project context (optional):
+  mem_search(query: "sdd-init/{project}", project: "{project}") → mem_get_observation(id) for full content
+Save exploration:
+  mem_save(title: "sdd/{argument}/explore", topic_key: "sdd/{argument}/explore", type: "architecture", project: "{project}", content: "{exploration}")
+
+This is an exploration only — do NOT create any files or modify code. Just research and return your analysis.
+
+Return a structured result with: status, executive_summary, detailed_report, artifacts, and next_recommended.

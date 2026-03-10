@@ -146,6 +146,7 @@ test_help_flag() {
     echo "$output" | grep -q "Usage:" || { echo "Help output missing 'Usage:'"; return 1; }
     echo "$output" | grep -q "claude-code" || { echo "Help output missing 'claude-code'"; return 1; }
     echo "$output" | grep -q "opencode" || { echo "Help output missing 'opencode'"; return 1; }
+    echo "$output" | grep -q "opencode-local" || { echo "Help output missing 'opencode-local'"; return 1; }
     echo "$output" | grep -q "all-global" || { echo "Help output missing 'all-global'"; return 1; }
     echo "$output" | grep -q "\-\-agent" || { echo "Help output missing '--agent'"; return 1; }
     echo "$output" | grep -q "\-\-path" || { echo "Help output missing '--path'"; return 1; }
@@ -220,6 +221,45 @@ test_opencode_commands() {
     local count
     count=$(find "$commands_dir" -name "sdd-*.md" | wc -l | tr -d ' ')
     assert_eq "8" "$count" "Expected exactly 8 OpenCode commands"
+}
+
+# ============================================================================
+# Tests — OpenCode (Project-local)
+# ============================================================================
+
+test_install_opencode_local() {
+    local project="$TEST_TMPDIR/opencode-project"
+    mkdir -p "$project"
+    (cd "$project" && bash "$INSTALL_SCRIPT" --agent opencode-local > /dev/null 2>&1)
+    assert_all_skills_installed "$project/.opencode/skills"
+}
+
+test_opencode_local_skill_count() {
+    local project="$TEST_TMPDIR/opencode-project"
+    mkdir -p "$project"
+    (cd "$project" && bash "$INSTALL_SCRIPT" --agent opencode-local > /dev/null 2>&1)
+    local count
+    count=$(find "$project/.opencode/skills" -name "SKILL.md" | wc -l | tr -d ' ')
+    assert_eq "9" "$count" "Expected exactly 9 skills for OpenCode (Project-local)"
+}
+
+test_opencode_local_commands() {
+    local project="$TEST_TMPDIR/opencode-project"
+    mkdir -p "$project"
+    (cd "$project" && bash "$INSTALL_SCRIPT" --agent opencode-local > /dev/null 2>&1)
+    local commands_dir="$project/.opencode/commands"
+    assert_dir_exists "$commands_dir" || return 1
+    assert_file_exists "$commands_dir/sdd-init.md" || return 1
+    assert_file_exists "$commands_dir/sdd-apply.md" || return 1
+    assert_file_exists "$commands_dir/sdd-explore.md" || return 1
+    assert_file_exists "$commands_dir/sdd-verify.md" || return 1
+    assert_file_exists "$commands_dir/sdd-archive.md" || return 1
+    assert_file_exists "$commands_dir/sdd-new.md" || return 1
+    assert_file_exists "$commands_dir/sdd-ff.md" || return 1
+    assert_file_exists "$commands_dir/sdd-continue.md" || return 1
+    local count
+    count=$(find "$commands_dir" -name "sdd-*.md" | wc -l | tr -d ' ')
+    assert_eq "8" "$count" "Expected exactly 8 OpenCode (Project-local) commands"
 }
 
 # ============================================================================
@@ -414,6 +454,20 @@ test_idempotent_opencode() {
     assert_eq "8" "$cmd_count" "Expected exactly 8 commands after double install"
 }
 
+test_idempotent_opencode_local() {
+    local project="$TEST_TMPDIR/opencode-project"
+    mkdir -p "$project"
+    (cd "$project" && bash "$INSTALL_SCRIPT" --agent opencode-local > /dev/null 2>&1)
+    (cd "$project" && bash "$INSTALL_SCRIPT" --agent opencode-local > /dev/null 2>&1)
+    assert_all_skills_installed "$project/.opencode/skills" || return 1
+    local skill_count
+    skill_count=$(find "$project/.opencode/skills" -name "SKILL.md" | wc -l | tr -d ' ')
+    assert_eq "9" "$skill_count" "Expected exactly 9 skills after double install" || return 1
+    local cmd_count
+    cmd_count=$(find "$project/.opencode/commands" -name "sdd-*.md" | wc -l | tr -d ' ')
+    assert_eq "8" "$cmd_count" "Expected exactly 8 commands after double install"
+}
+
 test_idempotent_all_global() {
     bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1
     bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1
@@ -453,6 +507,23 @@ test_opencode_command_content_matches_source() {
     bash "$INSTALL_SCRIPT" --agent opencode > /dev/null 2>&1
     local source_dir="$REPO_DIR/examples/opencode/commands"
     local target_dir="$HOME/.config/opencode/commands"
+    for cmd_file in "$source_dir"/sdd-*.md; do
+        local name
+        name=$(basename "$cmd_file")
+        if ! diff -q "$cmd_file" "$target_dir/$name" > /dev/null 2>&1; then
+            echo "Content mismatch: commands/$name"
+            return 1
+        fi
+    done
+    return 0
+}
+
+test_opencode_local_command_content_matches_source() {
+    local project="$TEST_TMPDIR/opencode-project"
+    mkdir -p "$project"
+    (cd "$project" && bash "$INSTALL_SCRIPT" --agent opencode-local > /dev/null 2>&1)
+    local source_dir="$REPO_DIR/examples/opencode_local/commands"
+    local target_dir="$project/.opencode/commands"
     for cmd_file in "$source_dir"/sdd-*.md; do
         local name
         name=$(basename "$cmd_file")
@@ -602,6 +673,12 @@ run_test "Exactly 9 SKILL.md files" test_opencode_skill_count
 run_test "Installs 8 command files" test_opencode_commands
 echo ""
 
+echo -e "${BOLD}OpenCode (Project-local)${NC}"
+run_test "Installs all 9 skills to ./.opencode/skills" test_install_opencode_local
+run_test "Exactly 9 SKILL.md files" test_opencode_local_skill_count
+run_test "Installs 8 command files" test_opencode_local_commands
+echo ""
+
 echo -e "${BOLD}Gemini CLI${NC}"
 run_test "Installs all 9 skills to ~/.gemini/skills" test_install_gemini_cli
 run_test "Exactly 9 SKILL.md files" test_gemini_cli_skill_count
@@ -647,12 +724,14 @@ echo ""
 echo -e "${BOLD}Idempotency${NC}"
 run_test "Claude Code: double install is safe" test_idempotent_claude_code
 run_test "OpenCode: double install is safe" test_idempotent_opencode
+run_test "OpenCode (Project-local): double install is safe" test_idempotent_opencode_local
 run_test "All-global: double install is safe" test_idempotent_all_global
 echo ""
 
 echo -e "${BOLD}Content integrity${NC}"
 run_test "Skills match source files exactly" test_skill_content_matches_source
-run_test "Commands match source files exactly" test_opencode_command_content_matches_source
+run_test "Global commands match source files exactly" test_opencode_command_content_matches_source
+run_test "Local commands match source files exactly" test_opencode_local_command_content_matches_source
 echo ""
 
 echo -e "${BOLD}Output verification${NC}"
