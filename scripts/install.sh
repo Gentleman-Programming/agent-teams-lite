@@ -115,6 +115,14 @@ get_tool_path() {
                 *)        echo "$HOME/.cursor/skills" ;;
             esac
             ;;
+        windsurf)
+            case "$OS" in
+                windows)  echo "$USERPROFILE/.agents/skills" ;;
+                wsl)      echo "$HOME/.agents/skills" ;;
+                *)        echo "$HOME/.agents/skills" ;;
+            esac
+            ;;
+        windsurf-workflows) echo "./.windsurf/workflows" ;;
         project-local) echo "./skills" ;;
     esac
 }
@@ -174,7 +182,7 @@ show_help() {
     echo "  --path DIR      Custom install path (use with --agent custom)"
     echo "  -h, --help      Show this help"
     echo ""
-    echo "Agents: claude-code, opencode, gemini-cli, codex, vscode, antigravity, cursor, project-local, all-global"
+    echo "Agents: claude-code, opencode, gemini-cli, codex, vscode, antigravity, cursor, windsurf, project-local, all-global"
 }
 
 # ============================================================================
@@ -276,6 +284,27 @@ install_opencode_commands() {
     echo -e "\n  ${GREEN}${BOLD}$count commands installed${NC} → $commands_target"
 }
 
+install_windsurf_workflows() {
+    local workflows_src="$REPO_DIR/examples/windsurf/.windsurf/workflows"
+    local workflows_target
+    workflows_target="$(get_tool_path windsurf-workflows)"
+
+    echo -e "\n${BLUE}Installing Windsurf workflows...${NC}"
+
+    mkdir -p "$workflows_target"
+
+    local count=0
+    for workflow_file in "$workflows_src"/sdd-*.md; do
+        local workflow_name
+        workflow_name=$(basename "$workflow_file")
+        cp "$workflow_file" "$workflows_target/$workflow_name"
+        print_skill "${workflow_name%.md}"
+        count=$((count + 1))
+    done
+
+    echo -e "\n  ${GREEN}${BOLD}$count workflows installed${NC} → $workflows_target"
+}
+
 # ============================================================================
 # Agent install dispatcher
 # ============================================================================
@@ -325,6 +354,16 @@ install_for_agent() {
             install_skills "$(get_tool_path cursor)" "Cursor"
             print_next_step ".cursorrules" "examples/cursor/.cursorrules"
             ;;
+        windsurf)
+            install_skills "$(get_tool_path windsurf)" "Windsurf"
+            install_windsurf_workflows
+            echo -e "\n${YELLOW}Note:${NC} Skills installed to ${BOLD}~/.agents/skills/${NC}"
+            echo -e "       Workflows installed to ${BOLD}./.windsurf/workflows/${NC} (project-local)"
+            echo -e "\n${YELLOW}How to use:${NC}"
+            echo -e "  • Open Windsurf in your project"
+            echo -e "  • Workflows are auto-discovered from .windsurf/workflows/"
+            echo -e "  • Use slash commands: ${CYAN}/sdd-init${NC}, ${CYAN}/sdd-new <name>${NC}, ${CYAN}/sdd-apply${NC}, etc."
+            ;;
         project-local)
             install_skills "$(get_tool_path project-local)" "Project-local"
             echo -e "\n${YELLOW}Note:${NC} Skills installed in ${BOLD}./skills/${NC} — relative to this project"
@@ -336,6 +375,8 @@ install_for_agent() {
             install_skills "$(get_tool_path gemini-cli)" "Gemini CLI"
             install_skills "$(get_tool_path codex)" "Codex"
             install_skills "$(get_tool_path cursor)" "Cursor"
+            install_skills "$(get_tool_path windsurf)" "Windsurf"
+            install_windsurf_workflows
             echo -e "\n${YELLOW}Next steps:${NC}"
             echo -e "  1. Add orchestrator to ${BOLD}~/.claude/CLAUDE.md${NC}"
             echo -e "  2. ${YELLOW}${BOLD}[REQUIRED]${NC} Add orchestrator agent to ${BOLD}~/.config/opencode/opencode.json${NC}"
@@ -343,6 +384,7 @@ install_for_agent() {
             echo -e "  3. Add orchestrator to ${BOLD}~/.gemini/GEMINI.md${NC}"
             echo -e "  4. Add orchestrator to ${BOLD}Codex instructions file${NC}"
             echo -e "  5. Add SDD rules to ${BOLD}.cursorrules${NC}"
+            echo -e "  6. Windsurf workflows installed to ${BOLD}./.windsurf/workflows/${NC} (auto-discovered)"
             ;;
         custom)
             if [[ -z "${CUSTOM_PATH:-}" ]]; then
@@ -372,11 +414,12 @@ interactive_menu() {
     echo "  5) VS Code        ($(get_tool_path vscode))"
     echo "  6) Antigravity    (~/.gemini/antigravity/skills/)"
     echo "  7) Cursor         ($(get_tool_path cursor))"
-    echo "  8) Project-local  ($(get_tool_path project-local))"
-    echo "  9) All global     (Claude Code + OpenCode + Gemini CLI + Codex + Cursor)"
-    echo "  10) Custom path"
+    echo "  8) Windsurf       ($(get_tool_path windsurf) + .windsurf/workflows/)"
+    echo "  9) Project-local  ($(get_tool_path project-local))"
+    echo "  10) All global    (Claude Code + OpenCode + Gemini CLI + Codex + Cursor + Windsurf)"
+    echo "  11) Custom path"
     echo ""
-    read -rp "Choice [1-10]: " choice
+    read -rp "Choice [1-11]: " choice
 
     case $choice in
         1)  install_for_agent "claude-code" ;;
@@ -386,9 +429,10 @@ interactive_menu() {
         5)  install_for_agent "vscode" ;;
         6)  install_for_agent "antigravity" ;;
         7)  install_for_agent "cursor" ;;
-        8)  install_for_agent "project-local" ;;
-        9)  install_for_agent "all-global" ;;
-        10) install_for_agent "custom" ;;
+        8)  install_for_agent "windsurf" ;;
+        9)  install_for_agent "project-local" ;;
+        10) install_for_agent "all-global" ;;
+        11) install_for_agent "custom" ;;
         *)
             print_error "Invalid choice"
             exit 1

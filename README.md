@@ -428,6 +428,7 @@ Dedicated setup guides for all supported tools:
 - [VS Code (Copilot)](#vs-code-copilot) — Agent mode with context files
 - [Antigravity](#antigravity) — Native skill support with `~/.gemini/antigravity/skills/` and `.agent/` paths
 - [Cursor](#cursor) — Inline skill execution
+- [Windsurf](#windsurf) — Full sub-agent support via Task tool + workflow system
 
 ### Claude Code
 
@@ -640,6 +641,41 @@ cp -r skills/_shared skills/sdd-* ./your-project/skills/
 Append the contents of [`examples/cursor/.cursorrules`](examples/cursor/.cursorrules) to your project's `.cursorrules` file.
 
 **Note:** Cursor doesn't have a Task tool for true sub-agent delegation. The skills still work — Cursor reads them as instructions — but the orchestrator runs inline rather than delegating to fresh-context sub-agents. For the best sub-agent experience, use Claude Code or OpenCode.
+
+---
+
+### Windsurf
+
+**1. Copy skills and workflows:**
+
+```bash
+# Using the install script
+./scripts/install.sh  # Choose Windsurf option
+
+# Or manually
+cp -r skills/sdd-* ~/.agents/skills/
+cp -r examples/windsurf/.windsurf ./your-project/
+```
+
+**2. Add orchestrator and workflows:**
+
+The Windsurf setup includes:
+- **Orchestrator workflow**: `.windsurf/workflows/sdd-orchestrator.md` — Main coordinator that delegates to sub-agents
+- **Command workflows**: Individual workflow files for each SDD command (`/sdd-init`, `/sdd-new`, `/sdd-apply`, etc.)
+
+The workflows are installed per-project in `.windsurf/workflows/`. Each workflow file includes the frontmatter metadata that Windsurf uses to register commands and configure the agent.
+
+**3. Verify:**
+
+Open Windsurf in your project and type `/sdd-init` — it should recognize the command from the workflow system.
+
+How to use in Windsurf:
+- Workflows are auto-discovered from `.windsurf/workflows/`
+- Use slash commands: `/sdd-init`, `/sdd-new <name>`, `/sdd-apply`, etc.
+- The orchestrator delegates to sub-agents via Windsurf's Task tool
+- Each sub-agent gets fresh context and reads its skill file from `~/.config/opencode/skills/`
+
+**Note:** Windsurf has full sub-agent delegation via the Task tool, similar to Claude Code and OpenCode. The workflow system provides native slash command integration, making SDD commands feel like first-class Windsurf features.
 
 ---
 

@@ -23,7 +23,7 @@
 [CmdletBinding()]
 param(
     [ValidateSet('claude-code', 'opencode', 'gemini-cli', 'codex', 'vscode',
-                 'antigravity', 'cursor', 'project-local', 'all-global', 'custom')]
+                 'antigravity', 'cursor', 'windsurf', 'project-local', 'all-global', 'custom')]
     [string]$Agent,
     [string]$Path,
     [switch]$Help
@@ -40,15 +40,17 @@ $RepoDir = Split-Path -Parent $ScriptRoot
 $SkillsSrc = Join-Path $RepoDir 'skills'
 
 $ToolPaths = @{
-    'claude-code'       = Join-Path $env:USERPROFILE '.claude\skills'
-    'opencode'          = Join-Path $env:USERPROFILE '.config\opencode\skills'
-    'opencode-commands' = Join-Path $env:USERPROFILE '.config\opencode\commands'
-    'gemini-cli'        = Join-Path $env:USERPROFILE '.gemini\skills'
-    'codex'             = Join-Path $env:USERPROFILE '.codex\skills'
-    'vscode'            = Join-Path '.' '.vscode\skills'
-    'antigravity'       = Join-Path $env:USERPROFILE '.gemini\antigravity\skills'
-    'cursor'            = Join-Path $env:USERPROFILE '.cursor\skills'
-    'project-local'     = Join-Path '.' 'skills'
+    'claude-code'        = Join-Path $env:USERPROFILE '.claude\skills'
+    'opencode'           = Join-Path $env:USERPROFILE '.config\opencode\skills'
+    'opencode-commands'  = Join-Path $env:USERPROFILE '.config\opencode\commands'
+    'gemini-cli'         = Join-Path $env:USERPROFILE '.gemini\skills'
+    'codex'              = Join-Path $env:USERPROFILE '.codex\skills'
+    'vscode'             = Join-Path '.' '.vscode\skills'
+    'antigravity'        = Join-Path $env:USERPROFILE '.gemini\antigravity\skills'
+    'cursor'             = Join-Path $env:USERPROFILE '.cursor\skills'
+    'windsurf'           = Join-Path $env:USERPROFILE '.agents\skills'
+    'windsurf-workflows' = Join-Path '.' '.windsurf\workflows'
+    'project-local'      = Join-Path '.' 'skills'
 }
 
 # ============================================================================
@@ -122,7 +124,7 @@ function Show-Usage {
     Write-Host '  -Path DIR      Custom install path (use with -Agent custom)'
     Write-Host '  -Help          Show this help'
     Write-Host ''
-    Write-Host 'Agents: claude-code, opencode, gemini-cli, codex, vscode, antigravity, cursor, project-local, all-global'
+    Write-Host 'Agents: claude-code, opencode, gemini-cli, codex, vscode, antigravity, cursor, windsurf, project-local, all-global'
 }
 
 # ============================================================================
@@ -236,6 +238,31 @@ function Install-OpenCodeCommands {
     Write-Host " -> $commandsTarget"
 }
 
+function Install-WindsurfWorkflows {
+    $workflowsSrc = Join-Path $RepoDir 'examples\windsurf\.windsurf\workflows'
+    $workflowsTarget = $ToolPaths['windsurf-workflows']
+
+    Write-Host ''
+    Write-Host 'Installing Windsurf workflows...' -ForegroundColor Blue
+
+    New-Item -ItemType Directory -Path $workflowsTarget -Force | Out-Null
+
+    $count = 0
+    $workflowFiles = Get-ChildItem -Path $workflowsSrc -File -Filter 'sdd-*.md'
+
+    foreach ($workflowFile in $workflowFiles) {
+        $workflowName = $workflowFile.BaseName
+        Copy-Item -Path $workflowFile.FullName -Destination (Join-Path $workflowsTarget $workflowFile.Name) -Force
+
+        Write-Skill $workflowName
+        $count++
+    }
+
+    Write-Host ''
+    Write-Host "  $count workflows installed" -ForegroundColor Green -NoNewline
+    Write-Host " -> $workflowsTarget"
+}
+
 # ============================================================================
 # Agent Install Dispatcher
 # ============================================================================
@@ -284,6 +311,28 @@ function Install-ForAgent {
             Install-Skills -TargetDir $ToolPaths['cursor'] -ToolName 'Cursor'
             Write-NextStep '.cursorrules' 'examples\cursor\.cursorrules'
         }
+        'windsurf' {
+            Install-Skills -TargetDir $ToolPaths['windsurf'] -ToolName 'Windsurf'
+            Install-WindsurfWorkflows
+            Write-Host ''
+            Write-Host 'Note: ' -ForegroundColor Yellow -NoNewline
+            Write-Host "Skills installed to " -NoNewline
+            Write-Host "~\.agents\skills\" -ForegroundColor White
+            Write-Host '       Workflows installed to ' -NoNewline
+            Write-Host '.windsurf\workflows\ ' -ForegroundColor White -NoNewline
+            Write-Host '(project-local)'
+            Write-Host ''
+            Write-Host 'How to use:' -ForegroundColor Yellow
+            Write-Host '  • Open Windsurf in your project'
+            Write-Host '  • Workflows are auto-discovered from .windsurf/workflows/'
+            Write-Host '  • Use slash commands: ' -NoNewline
+            Write-Host '/sdd-init' -ForegroundColor Cyan -NoNewline
+            Write-Host ', ' -NoNewline
+            Write-Host '/sdd-new <name>' -ForegroundColor Cyan -NoNewline
+            Write-Host ', ' -NoNewline
+            Write-Host '/sdd-apply' -ForegroundColor Cyan -NoNewline
+            Write-Host ', etc.'
+        }
         'project-local' {
             Install-Skills -TargetDir $ToolPaths['project-local'] -ToolName 'Project-local'
             Write-Host ''
@@ -296,6 +345,8 @@ function Install-ForAgent {
             Install-Skills -TargetDir $ToolPaths['gemini-cli'] -ToolName 'Gemini CLI'
             Install-Skills -TargetDir $ToolPaths['codex'] -ToolName 'Codex'
             Install-Skills -TargetDir $ToolPaths['cursor'] -ToolName 'Cursor'
+            Install-Skills -TargetDir $ToolPaths['windsurf'] -ToolName 'Windsurf'
+            Install-WindsurfWorkflows
             Write-Host ''
             Write-Host 'Next steps:' -ForegroundColor Yellow
             Write-Host '  1. Add orchestrator to ' -NoNewline
@@ -311,6 +362,9 @@ function Install-ForAgent {
             Write-Host 'Codex instructions file' -ForegroundColor White
             Write-Host '  5. Add SDD rules to ' -NoNewline
             Write-Host '.cursorrules' -ForegroundColor White
+            Write-Host '  6. Windsurf workflows installed to ' -NoNewline
+            Write-Host '.windsurf\workflows\' -ForegroundColor White -NoNewline
+            Write-Host ' (auto-discovered)'
         }
         'custom' {
             $customPath = $Path
@@ -346,12 +400,13 @@ function Show-Menu {
     Write-Host "   5) VS Code        ($($ToolPaths['vscode']))"
     Write-Host "   6) Antigravity    ($($ToolPaths['antigravity']))"
     Write-Host "   7) Cursor         ($($ToolPaths['cursor']))"
-    Write-Host "   8) Project-local  ($($ToolPaths['project-local']))"
-    Write-Host '   9) All global     (Claude Code + OpenCode + Gemini CLI + Codex + Cursor)'
-    Write-Host '  10) Custom path'
+    Write-Host "   8) Windsurf       ($($ToolPaths['windsurf']) + .windsurf\workflows\)"
+    Write-Host "   9) Project-local  ($($ToolPaths['project-local']))"
+    Write-Host '  10) All global     (Claude Code + OpenCode + Gemini CLI + Codex + Cursor + Windsurf)'
+    Write-Host '  11) Custom path'
     Write-Host ''
 
-    $choice = Read-Host 'Choice [1-10]'
+    $choice = Read-Host 'Choice [1-11]'
 
     $agentMap = @{
         '1'  = 'claude-code'
@@ -361,9 +416,10 @@ function Show-Menu {
         '5'  = 'vscode'
         '6'  = 'antigravity'
         '7'  = 'cursor'
-        '8'  = 'project-local'
-        '9'  = 'all-global'
-        '10' = 'custom'
+        '8'  = 'windsurf'
+        '9'  = 'project-local'
+        '10' = 'all-global'
+        '11' = 'custom'
     }
 
     if ($agentMap.ContainsKey($choice)) {

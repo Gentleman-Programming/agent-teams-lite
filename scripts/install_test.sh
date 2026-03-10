@@ -146,6 +146,7 @@ test_help_flag() {
     echo "$output" | grep -q "Usage:" || { echo "Help output missing 'Usage:'"; return 1; }
     echo "$output" | grep -q "claude-code" || { echo "Help output missing 'claude-code'"; return 1; }
     echo "$output" | grep -q "opencode" || { echo "Help output missing 'opencode'"; return 1; }
+    echo "$output" | grep -q "windsurf" || { echo "Help output missing 'windsurf'"; return 1; }
     echo "$output" | grep -q "all-global" || { echo "Help output missing 'all-global'"; return 1; }
     echo "$output" | grep -q "\-\-agent" || { echo "Help output missing '--agent'"; return 1; }
     echo "$output" | grep -q "\-\-path" || { echo "Help output missing '--path'"; return 1; }
@@ -307,6 +308,44 @@ test_cursor_skill_count() {
 }
 
 # ============================================================================
+# Tests — Windsurf
+# ============================================================================
+
+test_install_windsurf() {
+    local project="$TEST_TMPDIR/windsurf-project"
+    mkdir -p "$project"
+    (cd "$project" && bash "$INSTALL_SCRIPT" --agent windsurf > /dev/null 2>&1)
+    assert_all_skills_installed "$HOME/.agents/skills"
+}
+
+test_windsurf_skill_count() {
+    bash "$INSTALL_SCRIPT" --agent windsurf > /dev/null 2>&1
+    local count
+    count=$(find "$HOME/.agents/skills" -name "SKILL.md" | wc -l | tr -d ' ')
+    assert_eq "9" "$count" "Expected exactly 9 skills for Windsurf"
+}
+
+test_windsurf_workflows() {
+    local project="$TEST_TMPDIR/windsurf-project"
+    mkdir -p "$project"
+    (cd "$project" && bash "$INSTALL_SCRIPT" --agent windsurf > /dev/null 2>&1)
+    local workflows_dir="$project/.windsurf/workflows"
+    assert_dir_exists "$workflows_dir" || return 1
+    assert_file_exists "$workflows_dir/sdd-init.md" || return 1
+    assert_file_exists "$workflows_dir/sdd-apply.md" || return 1
+    assert_file_exists "$workflows_dir/sdd-explore.md" || return 1
+    assert_file_exists "$workflows_dir/sdd-verify.md" || return 1
+    assert_file_exists "$workflows_dir/sdd-archive.md" || return 1
+    assert_file_exists "$workflows_dir/sdd-new.md" || return 1
+    assert_file_exists "$workflows_dir/sdd-ff.md" || return 1
+    assert_file_exists "$workflows_dir/sdd-continue.md" || return 1
+    assert_file_exists "$workflows_dir/sdd-orchestrator.md" || return 1
+    local count
+    count=$(find "$workflows_dir" -name "sdd-*.md" | wc -l | tr -d ' ')
+    assert_eq "9" "$count" "Expected exactly 9 Windsurf workflows"
+}
+
+# ============================================================================
 # Tests — Project-local
 # ============================================================================
 
@@ -349,7 +388,9 @@ test_custom_path_skill_count() {
 # ============================================================================
 
 test_all_global() {
-    bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1
+    local project="$TEST_TMPDIR/all-global-project"
+    mkdir -p "$project"
+    (cd "$project" && bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1)
     # Claude Code
     assert_all_skills_installed "$HOME/.claude/skills" || return 1
     # OpenCode
@@ -360,33 +401,51 @@ test_all_global() {
     assert_all_skills_installed "$HOME/.codex/skills" || return 1
     # Cursor
     assert_all_skills_installed "$HOME/.cursor/skills" || return 1
+    # Windsurf
+    assert_all_skills_installed "$HOME/.agents/skills" || return 1
 }
 
 test_all_global_total_skill_count() {
-    bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1
-    # 5 targets × 9 skills = 45 SKILL.md files
+    local project="$TEST_TMPDIR/all-global-project"
+    mkdir -p "$project"
+    (cd "$project" && bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1)
+    # 6 targets × 9 skills = 54 SKILL.md files
     local total=0
     for dir in \
         "$HOME/.claude/skills" \
         "$HOME/.config/opencode/skills" \
         "$HOME/.gemini/skills" \
         "$HOME/.codex/skills" \
-        "$HOME/.cursor/skills"; do
+        "$HOME/.cursor/skills" \
+        "$HOME/.agents/skills"; do
         local count
         count=$(find "$dir" -name "SKILL.md" | wc -l | tr -d ' ')
         assert_eq "9" "$count" "Expected 9 skills in $dir" || return 1
         total=$((total + count))
     done
-    assert_eq "45" "$total" "Expected 45 total SKILL.md files across all targets"
+    assert_eq "54" "$total" "Expected 54 total SKILL.md files across all targets"
 }
 
 test_all_global_opencode_commands() {
-    bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1
+    local project="$TEST_TMPDIR/all-global-project"
+    mkdir -p "$project"
+    (cd "$project" && bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1)
     local commands_dir="$HOME/.config/opencode/commands"
     assert_dir_exists "$commands_dir" || return 1
     local count
     count=$(find "$commands_dir" -name "sdd-*.md" | wc -l | tr -d ' ')
     assert_eq "8" "$count" "Expected 8 OpenCode commands with all-global"
+}
+
+test_all_global_windsurf_workflows() {
+    local project="$TEST_TMPDIR/all-global-project"
+    mkdir -p "$project"
+    (cd "$project" && bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1)
+    local workflows_dir="$project/.windsurf/workflows"
+    assert_dir_exists "$workflows_dir" || return 1
+    local count
+    count=$(find "$workflows_dir" -name "sdd-*.md" | wc -l | tr -d ' ')
+    assert_eq "9" "$count" "Expected 9 Windsurf workflows with all-global"
 }
 
 # ============================================================================
@@ -415,14 +474,17 @@ test_idempotent_opencode() {
 }
 
 test_idempotent_all_global() {
-    bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1
-    bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1
+    local project="$TEST_TMPDIR/idempotent-project"
+    mkdir -p "$project"
+    (cd "$project" && bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1)
+    (cd "$project" && bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1)
     for dir in \
         "$HOME/.claude/skills" \
         "$HOME/.config/opencode/skills" \
         "$HOME/.gemini/skills" \
         "$HOME/.codex/skills" \
-        "$HOME/.cursor/skills"; do
+        "$HOME/.cursor/skills" \
+        "$HOME/.agents/skills"; do
         local count
         count=$(find "$dir" -name "SKILL.md" | wc -l | tr -d ' ')
         assert_eq "9" "$count" "Expected 9 skills in $dir after double install" || return 1
@@ -627,6 +689,12 @@ run_test "Installs all 9 skills to ~/.cursor/skills" test_install_cursor
 run_test "Exactly 9 SKILL.md files" test_cursor_skill_count
 echo ""
 
+echo -e "${BOLD}Windsurf${NC}"
+run_test "Installs all 9 skills to ~/.agents/skills" test_install_windsurf
+run_test "Exactly 9 SKILL.md files" test_windsurf_skill_count
+run_test "Installs 9 workflow files" test_windsurf_workflows
+echo ""
+
 echo -e "${BOLD}Project-local${NC}"
 run_test "Installs all 9 skills to ./skills/" test_install_project_local
 run_test "Exactly 9 SKILL.md files" test_project_local_skill_count
@@ -639,9 +707,10 @@ run_test "Handles deeply nested custom path" test_nested_custom_path
 echo ""
 
 echo -e "${BOLD}All-global${NC}"
-run_test "Installs to all 5 global targets" test_all_global
-run_test "45 total SKILL.md files (5×9)" test_all_global_total_skill_count
+run_test "Installs to all 6 global targets" test_all_global
+run_test "54 total SKILL.md files (6×9)" test_all_global_total_skill_count
 run_test "Also installs OpenCode commands" test_all_global_opencode_commands
+run_test "Also installs Windsurf workflows" test_all_global_windsurf_workflows
 echo ""
 
 echo -e "${BOLD}Idempotency${NC}"
