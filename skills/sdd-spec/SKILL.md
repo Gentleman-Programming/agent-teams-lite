@@ -21,8 +21,6 @@ From the orchestrator:
 
 ## Execution and Persistence Contract
 
-Read and follow `skills/_shared/persistence-contract.md` for mode resolution rules.
-
 - If mode is `engram`:
 
   **CRITICAL: `mem_search` returns 300-char PREVIEWS, not full content. You MUST call `mem_get_observation(id)` for EVERY artifact. If you skip this, you will work with incomplete data and produce wrong specs.**
@@ -47,7 +45,7 @@ Read and follow `skills/_shared/persistence-contract.md` for mode resolution rul
     content: "{your full spec markdown — all domains concatenated}"
   )
   ```
-  `topic_key` enables upserts — saving again updates, not duplicates.
+  `topic_key` enables upserts — saving again updates, not duplicates. (See `skills/_shared/sdd-phase-common.md`.)
 
   (See `skills/_shared/engram-convention.md` for full naming conventions.)
 - If mode is `openspec`: Read and follow `skills/_shared/openspec-convention.md`.
@@ -58,13 +56,9 @@ Read and follow `skills/_shared/persistence-contract.md` for mode resolution rul
 
 ### Step 1: Load Skill Registry
 
-**Do this FIRST, before any other work.**
+> **Common protocol**: See `skills/_shared/sdd-phase-common.md` for the full skill registry loading procedure, engram upsert note, and return envelope format.
 
-1. Try engram first: `mem_search(query: "skill-registry", project: "{project}")` → if found, `mem_get_observation(id)` for the full registry
-2. If engram not available or not found: read `.atl/skill-registry.md` from the project root
-3. If neither exists: proceed without skills (not an error)
-
-From the registry, identify and read any skills whose triggers match your task. Also read any project convention files listed in the registry.
+Load the skill registry and any matching skills before proceeding.
 
 ### Step 2: Identify Affected Domains
 
@@ -217,7 +211,8 @@ Ready for design (sdd-design). If design already exists, ready for tasks (sdd-ta
 - Keep scenarios TESTABLE — someone should be able to write an automated test from each one
 - DO NOT include implementation details in specs — specs describe WHAT, not HOW
 - Apply any `rules.specs` from `openspec/config.yaml`
-- Return a structured envelope with: `status`, `executive_summary`, `detailed_report` (optional), `artifacts`, `next_recommended`, and `risks`
+- **Token budget**: Spec artifact MUST be under 2,500 tokens (~650 words). Prefer requirement tables over narrative descriptions. Each scenario: 3-5 lines max.
+- Return a structured envelope with: `status`, `executive_summary`, `detailed_report` (optional), `artifacts`, `next_recommended`, and `risks` (see `skills/_shared/sdd-phase-common.md` for the full envelope spec)
 
 ## RFC 2119 Keywords Quick Reference
 
