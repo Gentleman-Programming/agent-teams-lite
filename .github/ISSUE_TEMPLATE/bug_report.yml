@@ -1,0 +1,143 @@
+name: Bug Report
+description: Report a bug in Agent Teams Lite
+labels: ["bug", "status:needs-review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # 🐛 Bug Report
+
+        Thanks for helping improve Agent Teams Lite! Please fill in all required fields so we can investigate quickly.
+
+        > **How this works:**
+        > 1. You submit this issue → it gets `status:needs-review` automatically
+        > 2. A maintainer reviews it → adds `status:approved` if accepted
+        > 3. Only then can a PR be opened to fix it
+        >
+        > See [CONTRIBUTING.md](https://github.com/Gentleman-Programming/agent-teams-lite/blob/main/CONTRIBUTING.md) for the full workflow.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: "📋 Pre-flight Checks"
+      description: Please confirm before submitting.
+      options:
+        - label: I have searched [existing issues](https://github.com/Gentleman-Programming/agent-teams-lite/issues) and this is not a duplicate
+          required: true
+        - label: I understand this issue needs `status:approved` before a PR can be opened
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "📝 Bug Description"
+      description: A clear and concise description of what the bug is.
+      placeholder: |
+        What happened? Be specific — include error messages, unexpected behavior, etc.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: "🔄 Steps to Reproduce"
+      description: Minimal steps to reproduce the behavior. The more precise, the faster the fix.
+      placeholder: |
+        1. Run `./scripts/setup.sh`
+        2. Open Claude Code / Gemini CLI
+        3. See error: "..."
+      value: |
+        1. 
+        2. 
+        3. 
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "✅ Expected Behavior"
+      description: What did you expect to happen?
+      placeholder: I expected the setup to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: "❌ Actual Behavior"
+      description: What actually happened? Include error messages, stack traces, or logs.
+      placeholder: |
+        Instead, this happened:
+        ```
+        paste error output here
+        ```
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 🖥️ Environment
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - macOS
+        - Linux (Ubuntu/Debian)
+        - Linux (Arch/Manjaro)
+        - Linux (Fedora/RHEL)
+        - Linux (Other)
+        - Windows
+        - Windows (WSL)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: agent
+    attributes:
+      label: Agent / Client
+      description: Which AI agent or client are you using?
+      options:
+        - Claude Code
+        - OpenCode
+        - Gemini CLI
+        - Cursor
+        - Windsurf
+        - Codex
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: shell
+    attributes:
+      label: Shell
+      description: Which shell are you running the scripts in?
+      options:
+        - bash
+        - zsh
+        - fish
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: "📋 Relevant Logs"
+      description: Paste any relevant log output. This will be auto-formatted as code.
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: "💡 Additional Context"
+      description: Any other context, screenshots, or workarounds you've found.
+    validations:
+      required: false

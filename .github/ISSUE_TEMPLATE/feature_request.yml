@@ -1,0 +1,94 @@
+name: Feature Request
+description: Suggest a new feature or improvement for Agent Teams Lite
+labels: ["enhancement", "status:needs-review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # ✨ Feature Request
+
+        Thanks for suggesting an improvement! Help us understand the problem you're solving.
+
+        > **How this works:**
+        > 1. You submit this issue → it gets `status:needs-review` automatically
+        > 2. A maintainer reviews it → adds `status:approved` if accepted
+        > 3. Only then can a PR be opened to implement it
+        >
+        > See [CONTRIBUTING.md](https://github.com/Gentleman-Programming/agent-teams-lite/blob/main/CONTRIBUTING.md) for the full workflow.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: "📋 Pre-flight Checks"
+      description: Please confirm before submitting.
+      options:
+        - label: I have searched [existing issues](https://github.com/Gentleman-Programming/agent-teams-lite/issues) and this is not a duplicate
+          required: true
+        - label: I understand this issue needs `status:approved` before a PR can be opened
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: "🔍 Problem Description"
+      description: What problem does this feature solve? Focus on the pain point, not the solution.
+      placeholder: |
+        I'm always frustrated when...
+        It's currently not possible to...
+        Every time I need to X, I have to manually...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: "💡 Proposed Solution"
+      description: Describe the solution you'd like. How should it work from the user's perspective?
+      placeholder: |
+        I'd like agent-teams-lite to...
+
+        Example usage:
+        ```bash
+        ./scripts/new-command.sh --flag
+        ```
+
+        Expected result:
+        ```
+        ...
+        ```
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: "📦 Affected Area"
+      description: Which part of agent-teams-lite does this affect?
+      options:
+        - Scripts (setup, installation)
+        - Skills (SDD phases, orchestrator)
+        - Examples (project templates)
+        - Documentation
+        - CI / GitHub Workflows
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "🔄 Alternatives Considered"
+      description: Have you considered any alternative approaches or workarounds?
+      placeholder: |
+        I also considered...
+        Currently I work around this by...
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: "📎 Additional Context"
+      description: Any other context, mockups, examples, or references that help explain the request.
+    validations:
+      required: false
