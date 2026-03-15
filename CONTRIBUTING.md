@@ -124,3 +124,4 @@ Use a **hybrid format**:
 Why hybrid:
 - Structured base protects correctness and architecture intent
 - Cookbook improves execution consistency for common flows
+<!-- CI trigger -->
