@@ -25,11 +25,22 @@ From the orchestrator:
 
 Read and follow `skills/_shared/persistence-contract.md` for mode resolution rules.
 
+Artifact resolution priority (prompt-first):
+1. Prompt context from orchestrator (highest priority)
+2. Engram persistence (`mem_search` -> `mem_get_observation`)
+3. Filesystem artifacts (`openspec`)
+
+If a required artifact is already present in the prompt context, use it directly and **DO NOT** query Engram for that artifact.
+Only query Engram for missing dependencies or when prompt content is explicitly partial/truncated.
+This keeps compatibility with runtimes that pass full artifacts inline or by reference.
+
 - If mode is `engram`:
+
+  Resolve dependencies using prompt-first priority. Query Engram only for artifacts not already provided in the prompt.
 
   **CRITICAL: `mem_search` returns 300-char PREVIEWS, not full content. You MUST call `mem_get_observation(id)` for EVERY artifact. If you skip this, you will verify against incomplete specs and miss issues.**
 
-  **STEP A — SEARCH** (get IDs only — content is truncated):
+  **STEP A — SEARCH** (ONLY for artifacts missing from prompt; get IDs only — content is truncated):
   1. `mem_search(query: "sdd/{change-name}/proposal", project: "{project}")` → save ID
   2. `mem_search(query: "sdd/{change-name}/spec", project: "{project}")` → save ID
   3. `mem_search(query: "sdd/{change-name}/design", project: "{project}")` → save ID
