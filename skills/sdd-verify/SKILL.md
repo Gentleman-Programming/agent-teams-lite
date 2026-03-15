@@ -51,7 +51,7 @@ From the orchestrator:
     content: "{your full verification report markdown}"
   )
   ```
-  `topic_key` enables upserts — saving again updates, not duplicates.
+  `topic_key` enables upserts — saving again updates, not duplicates. (Read `skills/_shared/sdd-phase-common.md`.)
 
   (See `skills/_shared/engram-convention.md` for full naming conventions.)
 - If mode is `openspec`: Read and follow `skills/_shared/openspec-convention.md`. Save to `openspec/changes/{change-name}/verify-report.md`.
@@ -63,6 +63,8 @@ From the orchestrator:
 ### Step 1: Load Skills
 
 The orchestrator provides your skill path in the launch prompt. Load it now. If no path was provided, proceed without additional skills.
+
+> Read `skills/_shared/sdd-phase-common.md` for the engram upsert note and return envelope format.
 
 ### Step 2: Check Completeness
 
@@ -310,4 +312,4 @@ Return to the orchestrator the same content you wrote to `verify-report.md`:
 - DO NOT fix any issues — only report them. The orchestrator decides what to do.
 - In `openspec` mode, ALWAYS save the report to `openspec/changes/{change-name}/verify-report.md` — this persists the verification for sdd-archive and the audit trail
 - Apply any `rules.verify` from `openspec/config.yaml`
-- Return a structured envelope with: `status`, `executive_summary`, `detailed_report` (optional), `artifacts`, `next_recommended`, and `risks`
+- Return a structured envelope with: `status`, `executive_summary`, `detailed_report` (optional), `artifacts`, `next_recommended`, and `risks` (read `skills/_shared/sdd-phase-common.md` for the full envelope spec)

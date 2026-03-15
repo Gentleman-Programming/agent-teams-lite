@@ -53,7 +53,7 @@ From the orchestrator:
     content: "{your archive report with all observation IDs for lineage}"
   )
   ```
-  `topic_key` enables upserts — saving again updates, not duplicates.
+  `topic_key` enables upserts — saving again updates, not duplicates. (Read `skills/_shared/sdd-phase-common.md`.)
 
   (See `skills/_shared/engram-convention.md` for full naming conventions.)
 - If mode is `openspec`: Read and follow `skills/_shared/openspec-convention.md`. Perform merge and archive folder moves.
@@ -65,6 +65,8 @@ From the orchestrator:
 ### Step 1: Load Skills
 
 The orchestrator provides your skill path in the launch prompt. Load it now. If no path was provided, proceed without additional skills.
+
+> Read `skills/_shared/sdd-phase-common.md` for the engram upsert note and return envelope format.
 
 ### Step 2: Sync Delta Specs to Main Specs
 
@@ -186,4 +188,4 @@ Ready for the next change.
 - The archive is an AUDIT TRAIL — never delete or modify archived changes
 - If `openspec/changes/archive/` doesn't exist, create it
 - Apply any `rules.archive` from `openspec/config.yaml`
-- Return a structured envelope with: `status`, `executive_summary`, `detailed_report` (optional), `artifacts`, `next_recommended`, and `risks`
+- Return a structured envelope with: `status`, `executive_summary`, `detailed_report` (optional), `artifacts`, `next_recommended`, and `risks` (read `skills/_shared/sdd-phase-common.md` for the full envelope spec)
