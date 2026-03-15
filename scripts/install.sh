@@ -80,6 +80,7 @@ get_tool_path() {
                 *)        echo "$HOME/.config/opencode/skills" ;;
             esac
             ;;
+        opencode-local)      echo "./.opencode/skills" ;;
         opencode-commands)
             case "$OS" in
                 windows)  echo "$USERPROFILE/.config/opencode/commands" ;;
@@ -87,6 +88,7 @@ get_tool_path() {
                 *)        echo "$HOME/.config/opencode/commands" ;;
             esac
             ;;
+        opencode-commands-local)      echo "./.opencode/commands" ;;
         gemini-cli)
             case "$OS" in
                 windows)  echo "$USERPROFILE/.gemini/skills" ;;
@@ -179,7 +181,7 @@ show_help() {
     echo "  --path DIR      Custom install path (use with --agent custom)"
     echo "  -h, --help      Show this help"
     echo ""
-    echo "Agents: claude-code, opencode, gemini-cli, codex, vscode, antigravity, cursor, project-local, all-global"
+    echo "Agents: claude-code, opencode, opencode-local, gemini-cli, codex, vscode, antigravity, cursor, project-local, all-global"
 }
 
 # ============================================================================
@@ -283,6 +285,27 @@ install_opencode_commands() {
     echo -e "\n  ${GREEN}${BOLD}$count commands installed${NC} → $commands_target"
 }
 
+install_opencode_commands_local() {
+    local commands_src="$REPO_DIR/examples/opencode_local/commands"
+    local commands_target
+    commands_target="$(get_tool_path opencode-commands-local)"
+
+    echo -e "\n${BLUE}Installing OpenCode (Project-local) commands...${NC}"
+
+    mkdir -p "$commands_target"
+
+    local count=0
+    for cmd_file in "$commands_src"/sdd-*.md; do
+        local cmd_name
+        cmd_name=$(basename "$cmd_file")
+        cp "$cmd_file" "$commands_target/$cmd_name"
+        print_skill "${cmd_name%.md}"
+        count=$((count + 1))
+    done
+
+    echo -e "\n  ${GREEN}${BOLD}$count commands installed${NC} → $commands_target"
+}
+
 # ============================================================================
 # Agent install dispatcher
 # ============================================================================
@@ -300,12 +323,27 @@ install_for_agent() {
             install_opencode_commands
             echo ""
             echo -e "${YELLOW}${BOLD}╔══════════════════════════════════════════════════════════════╗${NC}"
-            echo -e "${YELLOW}${BOLD}║  ACTION REQUIRED: Add the sdd-orchestrator agent config     ║${NC}"
+            echo -e "${YELLOW}${BOLD}║  ACTION REQUIRED: Add the sdd-orchestrator agent config      ║${NC}"
             echo -e "${YELLOW}${BOLD}║                                                              ║${NC}"
             echo -e "${YELLOW}${BOLD}║  Copy the agent block from:                                  ║${NC}"
             echo -e "${YELLOW}${BOLD}║    examples/opencode/opencode.json                           ║${NC}"
             echo -e "${YELLOW}${BOLD}║  Into your:                                                  ║${NC}"
             echo -e "${YELLOW}${BOLD}║    ~/.config/opencode/opencode.json                          ║${NC}"
+            echo -e "${YELLOW}${BOLD}║                                                              ║${NC}"
+            echo -e "${YELLOW}${BOLD}║  Without this, /sdd-* commands will not find the agent.      ║${NC}"
+            echo -e "${YELLOW}${BOLD}╚══════════════════════════════════════════════════════════════╝${NC}"
+            ;;
+        opencode-local)
+            install_skills "$(get_tool_path opencode-local)" "OpenCode (Project-local)"
+            install_opencode_commands_local
+            echo ""
+            echo -e "${YELLOW}${BOLD}╔══════════════════════════════════════════════════════════════╗${NC}"
+            echo -e "${YELLOW}${BOLD}║  ACTION REQUIRED: Add the sdd-orchestrator agent config      ║${NC}"
+            echo -e "${YELLOW}${BOLD}║                                                              ║${NC}"
+            echo -e "${YELLOW}${BOLD}║  Copy the agent block from:                                  ║${NC}"
+            echo -e "${YELLOW}${BOLD}║    examples/opencode_local/opencode.json                     ║${NC}"
+            echo -e "${YELLOW}${BOLD}║  Into your:                                                  ║${NC}"
+            echo -e "${YELLOW}${BOLD}║    ./.opencode/opencode.json                                 ║${NC}"
             echo -e "${YELLOW}${BOLD}║                                                              ║${NC}"
             echo -e "${YELLOW}${BOLD}║  Without this, /sdd-* commands will not find the agent.      ║${NC}"
             echo -e "${YELLOW}${BOLD}╚══════════════════════════════════════════════════════════════╝${NC}"
@@ -371,30 +409,32 @@ install_for_agent() {
 
 interactive_menu() {
     echo -e "${BOLD}Select your AI coding assistant:${NC}\n"
-    echo "  1) Claude Code    ($(get_tool_path claude-code))"
-    echo "  2) OpenCode       ($(get_tool_path opencode))"
-    echo "  3) Gemini CLI     ($(get_tool_path gemini-cli))"
-    echo "  4) Codex          ($(get_tool_path codex))"
-    echo "  5) VS Code        ($(get_tool_path vscode))"
-    echo "  6) Antigravity    (~/.gemini/antigravity/skills/)"
-    echo "  7) Cursor         ($(get_tool_path cursor))"
-    echo "  8) Project-local  ($(get_tool_path project-local))"
-    echo "  9) All global     (Claude Code + OpenCode + Gemini CLI + Codex + Cursor)"
-    echo "  10) Custom path"
+    echo "  1) Claude Code                ($(get_tool_path claude-code))"
+    echo "  2) OpenCode                   ($(get_tool_path opencode))"
+    echo "  3) OpenCode (Project-local)   ($(get_tool_path opencode-local))"
+    echo "  4) Gemini CLI                 ($(get_tool_path gemini-cli))"
+    echo "  5) Codex                      ($(get_tool_path codex))"
+    echo "  6) VS Code                    ($(get_tool_path vscode))"
+    echo "  7) Antigravity                (~/.gemini/antigravity/skills/)"
+    echo "  8) Cursor                     ($(get_tool_path cursor))"
+    echo "  9) Project-local              ($(get_tool_path project-local))"
+    echo " 10) All global     (Claude Code + OpenCode + Gemini CLI + Codex + Cursor)"
+    echo " 11) Custom path"
     echo ""
-    read -rp "Choice [1-10]: " choice
+    read -rp "Choice [1-11]: " choice
 
     case $choice in
         1)  install_for_agent "claude-code" ;;
         2)  install_for_agent "opencode" ;;
-        3)  install_for_agent "gemini-cli" ;;
-        4)  install_for_agent "codex" ;;
-        5)  install_for_agent "vscode" ;;
-        6)  install_for_agent "antigravity" ;;
-        7)  install_for_agent "cursor" ;;
-        8)  install_for_agent "project-local" ;;
-        9)  install_for_agent "all-global" ;;
-        10) install_for_agent "custom" ;;
+        3)  install_for_agent "opencode-local" ;;
+        4)  install_for_agent "gemini-cli" ;;
+        5)  install_for_agent "codex" ;;
+        6)  install_for_agent "vscode" ;;
+        7)  install_for_agent "antigravity" ;;
+        8)  install_for_agent "cursor" ;;
+        9)  install_for_agent "project-local" ;;
+        10) install_for_agent "all-global" ;;
+        11) install_for_agent "custom" ;;
         *)
             print_error "Invalid choice"
             exit 1

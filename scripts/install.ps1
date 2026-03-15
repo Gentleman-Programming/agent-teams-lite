@@ -40,15 +40,17 @@ $RepoDir = Split-Path -Parent $ScriptRoot
 $SkillsSrc = Join-Path $RepoDir 'skills'
 
 $ToolPaths = @{
-    'claude-code'       = Join-Path $env:USERPROFILE '.claude\skills'
-    'opencode'          = Join-Path $env:USERPROFILE '.config\opencode\skills'
-    'opencode-commands' = Join-Path $env:USERPROFILE '.config\opencode\commands'
-    'gemini-cli'        = Join-Path $env:USERPROFILE '.gemini\skills'
-    'codex'             = Join-Path $env:USERPROFILE '.codex\skills'
-    'vscode'            = Join-Path $env:USERPROFILE '.copilot\skills'
-    'antigravity'       = Join-Path $env:USERPROFILE '.gemini\antigravity\skills'
-    'cursor'            = Join-Path $env:USERPROFILE '.cursor\skills'
-    'project-local'     = Join-Path '.' 'skills'
+    'claude-code'             = Join-Path $env:USERPROFILE '.claude\skills'
+    'opencode'                = Join-Path $env:USERPROFILE '.config\opencode\skills'
+    'opencode-commands'       = Join-Path $env:USERPROFILE '.config\opencode\commands'
+    'opencode-local'          = Join-Path '.' '.opencode\skills'
+    'opencode-commands-local' = Join-Path '.' '.opencode\commands'
+    'gemini-cli'              = Join-Path $env:USERPROFILE '.gemini\skills'
+    'codex'                   = Join-Path $env:USERPROFILE '.codex\skills'
+    'vscode'                  = Join-Path $env:USERPROFILE '.copilot\skills'
+    'antigravity'             = Join-Path $env:USERPROFILE '.gemini\antigravity\skills'
+    'cursor'                  = Join-Path $env:USERPROFILE '.cursor\skills'
+    'project-local'           = Join-Path '.' 'skills'
 }
 
 # ============================================================================
@@ -241,6 +243,31 @@ function Install-OpenCodeCommands {
     Write-Host " -> $commandsTarget"
 }
 
+function Install-OpenCodeCommandsLocal {
+    $commandsSrc = Join-Path $RepoDir 'examples\opencode_local\commands'
+    $commandsTarget = $ToolPaths['opencode-commands-local']
+
+    Write-Host ''
+    Write-Host 'Installing OpenCode (Project-local) commands...' -ForegroundColor Blue
+
+    New-Item -ItemType Directory -Path $commandsTarget -Force | Out-Null
+
+    $count = 0
+    $cmdFiles = Get-ChildItem -Path $commandsSrc -File -Filter 'sdd-*.md'
+
+    foreach ($cmdFile in $cmdFiles) {
+        $cmdName = $cmdFile.BaseName
+        Copy-Item -Path $cmdFile.FullName -Destination (Join-Path $commandsTarget $cmdFile.Name) -Force
+
+        Write-Skill $cmdName
+        $count++
+    }
+
+    Write-Host ''
+    Write-Host "  $count commands installed" -ForegroundColor Green -NoNewline
+    Write-Host " -> $commandsTarget"
+}
+
 # ============================================================================
 # Agent Install Dispatcher
 # ============================================================================
@@ -258,12 +285,27 @@ function Install-ForAgent {
             Install-OpenCodeCommands
             Write-Host ''
             Write-Host ([char]0x2554 + ([string][char]0x2550 * 62) + [char]0x2557) -ForegroundColor Yellow
-            Write-Host ([char]0x2551 + '  ACTION REQUIRED: Add the sdd-orchestrator agent config     ' + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + '  ACTION REQUIRED: Add the sdd-orchestrator agent config      ' + [char]0x2551) -ForegroundColor Yellow
             Write-Host ([char]0x2551 + '                                                              ' + [char]0x2551) -ForegroundColor Yellow
             Write-Host ([char]0x2551 + '  Copy the agent block from:                                  ' + [char]0x2551) -ForegroundColor Yellow
             Write-Host ([char]0x2551 + '    examples\opencode\opencode.json                           ' + [char]0x2551) -ForegroundColor Yellow
             Write-Host ([char]0x2551 + '  Into your:                                                  ' + [char]0x2551) -ForegroundColor Yellow
             Write-Host ([char]0x2551 + "    $env:USERPROFILE\.config\opencode\opencode.json            " + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + '                                                              ' + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + '  Without this, /sdd-* commands will not find the agent.      ' + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x255A + ([string][char]0x2550 * 62) + [char]0x255D) -ForegroundColor Yellow
+        }
+        'opencode-local' {
+            Install-Skills -TargetDir $ToolPaths['opencode-local'] -ToolName 'OpenCode (Project-local)'
+            Install-OpenCodeCommandsLocal
+            Write-Host ''
+            Write-Host ([char]0x2554 + ([string][char]0x2550 * 62) + [char]0x2557) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + '  ACTION REQUIRED: Add the sdd-orchestrator agent config      ' + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + '                                                              ' + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + '  Copy the agent block from:                                  ' + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + '    examples\opencode_local\opencode.json                     ' + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + '  Into your:                                                  ' + [char]0x2551) -ForegroundColor Yellow
+            Write-Host ([char]0x2551 + '    .\.opencode\opencode.json                                 ' + [char]0x2551) -ForegroundColor Yellow
             Write-Host ([char]0x2551 + '                                                              ' + [char]0x2551) -ForegroundColor Yellow
             Write-Host ([char]0x2551 + '  Without this, /sdd-* commands will not find the agent.      ' + [char]0x2551) -ForegroundColor Yellow
             Write-Host ([char]0x255A + ([string][char]0x2550 * 62) + [char]0x255D) -ForegroundColor Yellow
@@ -343,16 +385,17 @@ function Install-ForAgent {
 function Show-Menu {
     Write-Host 'Select your AI coding assistant:' -ForegroundColor White
     Write-Host ''
-    Write-Host "   1) Claude Code    ($($ToolPaths['claude-code']))"
-    Write-Host "   2) OpenCode       ($($ToolPaths['opencode']))"
-    Write-Host "   3) Gemini CLI     ($($ToolPaths['gemini-cli']))"
-    Write-Host "   4) Codex          ($($ToolPaths['codex']))"
-    Write-Host "   5) VS Code        ($($ToolPaths['vscode']))"
-    Write-Host "   6) Antigravity    ($($ToolPaths['antigravity']))"
-    Write-Host "   7) Cursor         ($($ToolPaths['cursor']))"
-    Write-Host "   8) Project-local  ($($ToolPaths['project-local']))"
-    Write-Host '   9) All global     (Claude Code + OpenCode + Gemini CLI + Codex + Cursor)'
-    Write-Host '  10) Custom path'
+    Write-Host "   1) Claude Code                  ($($ToolPaths['claude-code']))"
+    Write-Host "   2) OpenCode                     ($($ToolPaths['opencode']))"
+    Write-Host "   3) OpenCode (Project-local)     ($($ToolPaths['opencode-local']))"
+    Write-Host "   4) Gemini CLI                   ($($ToolPaths['gemini-cli']))"
+    Write-Host "   5) Codex                        ($($ToolPaths['codex']))"
+    Write-Host "   6) VS Code                      ($($ToolPaths['vscode']))"
+    Write-Host "   7) Antigravity                  ($($ToolPaths['antigravity']))"
+    Write-Host "   8) Cursor                       ($($ToolPaths['cursor']))"
+    Write-Host "   9) Project-local                ($($ToolPaths['project-local']))"
+    Write-Host '  10) All global                   (Claude Code + OpenCode + Gemini CLI + Codex + Cursor)'
+    Write-Host '  11) Custom path'
     Write-Host ''
 
     $choice = Read-Host 'Choice [1-10]'
@@ -360,14 +403,15 @@ function Show-Menu {
     $agentMap = @{
         '1'  = 'claude-code'
         '2'  = 'opencode'
-        '3'  = 'gemini-cli'
-        '4'  = 'codex'
-        '5'  = 'vscode'
-        '6'  = 'antigravity'
-        '7'  = 'cursor'
-        '8'  = 'project-local'
-        '9'  = 'all-global'
-        '10' = 'custom'
+        '3'  = 'opencode-local'
+        '4'  = 'gemini-cli'
+        '5'  = 'codex'
+        '6'  = 'vscode'
+        '7'  = 'antigravity'
+        '8'  = 'cursor'
+        '9'  = 'project-local'
+        '10' = 'all-global'
+        '11' = 'custom'
     }
 
     if ($agentMap.ContainsKey($choice)) {
