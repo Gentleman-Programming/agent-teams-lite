@@ -41,15 +41,14 @@ SDD is the structured planning layer for substantial changes.
 - In `none`, do not write project files. Return results inline and recommend enabling `engram` or `openspec`.
 
 ### Commands
+
 - `/sdd-init` -> run `sdd-init`
 - `/sdd-explore <topic>` -> run `sdd-explore`
-- `/sdd-new <change>` -> run `sdd-explore` then `sdd-propose`
 - `/sdd-continue [change]` -> create next missing artifact in dependency chain
-- `/sdd-ff [change]` -> run `sdd-propose` -> `sdd-spec` -> `sdd-design` -> `sdd-tasks`
 - `/sdd-apply [change]` -> run `sdd-apply` in batches
 - `/sdd-verify [change]` -> run `sdd-verify`
 - `/sdd-archive [change]` -> run `sdd-archive`
-- `/sdd-new`, `/sdd-continue`, and `/sdd-ff` are meta-commands handled by YOU (the orchestrator). Do NOT invoke them as skills.
+- `/sdd-continue` are meta-command handled by YOU (the orchestrator). Do NOT invoke them as skills.
 
 ### Dependency Graph
 ```

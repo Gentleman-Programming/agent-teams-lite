@@ -24,9 +24,20 @@ From the orchestrator:
 
 Read and follow `skills/_shared/persistence-contract.md` for mode resolution rules.
 
+Artifact resolution priority (prompt-first):
+1. Prompt context from orchestrator (highest priority)
+2. Engram persistence (`mem_search` -> `mem_get_observation`)
+3. Filesystem artifacts (`openspec`)
+
+If a required artifact is already present in the prompt context, use it directly and **DO NOT** query Engram for that artifact.
+Only query Engram for missing dependencies or when prompt content is explicitly partial/truncated.
+This keeps compatibility with runtimes that pass full artifacts inline or by reference.
+
 - If mode is `engram`:
 
-  **Read dependencies** (two-step — search returns truncated previews):
+  Resolve dependencies using prompt-first priority. Query Engram only for artifacts not already provided in the prompt.
+
+  **Read dependencies** (prompt-first: only use two-step retrieval for artifacts missing from prompt; search returns truncated previews):
   1. `mem_search(query: "sdd/{change-name}/explore", project: "{project}")` → get observation ID (optional — may not exist)
   2. If found: `mem_get_observation(id: {id})` → full exploration content
   3. `mem_search(query: "sdd-init/{project}", project: "{project}")` → project context (optional)
