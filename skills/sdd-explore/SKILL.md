@@ -23,7 +23,18 @@ The orchestrator will give you:
 
 Read and follow `skills/_shared/persistence-contract.md` for mode resolution rules.
 
+Artifact resolution priority (prompt-first):
+1. Prompt context from orchestrator (highest priority)
+2. Engram persistence (`mem_search` -> `mem_get_observation`)
+3. Filesystem artifacts (`openspec`)
+
+If a required artifact is already present in the prompt context, use it directly and **DO NOT** query Engram for that artifact.
+Only query Engram for missing dependencies or when prompt content is explicitly partial/truncated.
+This keeps compatibility with runtimes that pass full artifacts inline or by reference.
+
 - If mode is `engram`:
+
+  Resolve dependencies using prompt-first priority. Query Engram only for artifacts not already provided in the prompt.
 
   **Read context** (optional — load project context if available):
   1. `mem_search(query: "sdd-init/{project}", project: "{project}")` → get observation ID
@@ -60,14 +71,15 @@ Read and follow `skills/_shared/persistence-contract.md` for mode resolution rul
 
 ### Retrieving Context
 
-Before starting, load any existing project context and specs per the active convention:
-- **engram**:
+Before starting, resolve context with prompt-first priority:
+- **prompt context first**: if the orchestrator already included project context/artifacts, use that directly.
+- **engram**: only if required context is missing from prompt:
   1. `mem_search(query: "sdd-init/{project}", project: "{project}")` → get observation ID
   2. `mem_get_observation(id: {id from step 1})` → full project context
   3. Optionally `mem_search(query: "sdd/", project: "{project}")` → find existing artifacts
   (If no results, proceed without prior context.)
-- **openspec**: Read `openspec/config.yaml` and `openspec/specs/`.
-- **none**: Use whatever context the orchestrator passed in the prompt.
+- **openspec**: if still missing, read `openspec/config.yaml` and `openspec/specs/`.
+- **none**: use whatever context the orchestrator passed in the prompt.
 
 ## What to Do
 
