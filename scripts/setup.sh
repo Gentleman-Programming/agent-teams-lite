@@ -397,6 +397,16 @@ setup_opencode() {
         warn "Merge manually: copy agent block from examples/opencode/opencode.${OPENCODE_MODE}.json"
         info "Into: $config_file"
     fi
+
+    # Install background-agents plugin
+    local plugins_dir="$home/.config/opencode/plugins"
+    local plugin_src="$SCRIPT_DIR/../examples/opencode/plugins/background-agents.ts"
+    mkdir -p "$plugins_dir"
+    cp "$plugin_src" "$plugins_dir/background-agents.ts"
+    ok "background-agents plugin installed → $plugins_dir"
+    info "Installing npm dependency: unique-names-generator"
+    (cd "$home/.config/opencode" && npm install unique-names-generator)
+    ok "unique-names-generator installed"
 }
 
 # ============================================================================

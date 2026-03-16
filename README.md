@@ -502,10 +502,10 @@ Sub-agents start with a **fresh context** — they don't know what user skills e
 - OpenCode special handling: slash commands + JSON config merge.
 
 **v3.3.6 — OpenCode Multi-Model Support:**
-- New **multi-model mode** for OpenCode: one dedicated agent per SDD phase, each configurable with its own model.
+- New **multi-model mode** for OpenCode: both `opencode.single.json` and `opencode.multi.json` include the full 10-agent setup (orchestrator + 9 sub-agents) with `delegate` tool support.
 - Setup scripts ask which mode to use (single vs multi) or accept `--opencode-mode` flag.
-- Single mode (default) unchanged — one `sdd-orchestrator` handles everything.
-- Multi mode creates 9 hidden subagents + orchestrator with phase delegation and task permissions.
+- **single.json** — ready to use as-is; all agents inherit the default model.
+- **multi.json** — same structure, serves as a template for assigning different models per agent.
 
 ---
 
@@ -536,7 +536,7 @@ The setup script:
 Below are per-tool details for manual installation or reference.
 
 - [Claude Code](#claude-code) — Full sub-agent support via Task tool
-- [OpenCode](#opencode) — Full sub-agent support via Task tool
+- [OpenCode](#opencode) — Full sub-agent support via Task and delegate tools (async background delegation in both modes)
 - [Gemini CLI](#gemini-cli) — Inline skill execution
 - [Codex](#codex) — Inline skill execution
 - [VS Code (Copilot)](#vs-code-copilot) — Agent mode with context files
@@ -572,26 +572,24 @@ The example is intentionally lean to avoid token bloat in always-loaded system p
 
 > **Automatic:** `./scripts/setup.sh --agent opencode` handles all steps below.
 
-OpenCode supports two agent modes:
+Both configs include the full 10-agent setup: `sdd-orchestrator` + 9 phase sub-agents, with `delegate` tool support for async background delegation. The only difference is their intended use:
 
-#### Single Model (default)
-
-One `sdd-orchestrator` agent handles all phases with the same model. Simple and easy to maintain.
+| | `opencode.single.json` | `opencode.multi.json` |
+|---|---|---|
+| **Use case** | Ready to use as-is | Template for per-agent model customization |
+| **Agent structure** | Identical (10 agents) | Identical (10 agents) |
+| **Models** | All inherit the default model | Add `"model"` fields to customize per phase |
+| **delegate tool** | ✅ Included | ✅ Included |
 
 ```bash
 ./scripts/setup.sh --agent opencode                        # Interactive (asks which mode)
-./scripts/setup.sh --agent opencode --opencode-mode single # Explicit single mode
+./scripts/setup.sh --agent opencode --opencode-mode single # Use as-is with default model
+./scripts/setup.sh --agent opencode --opencode-mode multi  # Template for per-agent models
 ```
 
-#### Multi-Model (per-phase agents)
+#### Per-Agent Model Customization (multi mode)
 
-One dedicated agent per SDD phase, each configurable with its own model. Use a cheap/fast model for exploration, a strong coder for implementation, and your most capable model for verification.
-
-```bash
-./scripts/setup.sh --agent opencode --opencode-mode multi
-```
-
-This creates 9 subagents (`sdd-init`, `sdd-explore`, `sdd-propose`, `sdd-spec`, `sdd-design`, `sdd-tasks`, `sdd-apply`, `sdd-verify`, `sdd-archive`) plus the `sdd-orchestrator` coordinator. To assign models, edit `~/.config/opencode/opencode.json` and add `"model": "provider/model-id"` to each agent:
+To assign different models per phase, edit `~/.config/opencode/opencode.json` and add `"model": "provider/model-id"` to each agent:
 
 ```json
 {
@@ -608,8 +606,9 @@ This creates 9 subagents (`sdd-init`, `sdd-explore`, `sdd-propose`, `sdd-spec`, 
 
 The format is `"provider/model-id"` — check your available models at `~/.cache/opencode/models.json`. Common providers: `anthropic`, `openai`, `google`, `openrouter`. Agents without a `model` field inherit the default model.
 
+Both modes install the `background-agents` plugin (`examples/opencode/plugins/background-agents.ts`), which enables async sub-agent delegation. Use `delegate` to run sub-agents in the background (non-blocking) while the orchestrator continues other work; use `task` to block until the sub-agent completes.
+
 The setup script preserves your model choices across updates — re-running `setup.sh` will update agent prompts and tools but keep any `model` fields you configured.
-```
 
 <details>
 <summary>Manual installation</summary>
@@ -845,9 +844,10 @@ agent-teams-lite/
 ├── examples/                          ← Config examples per tool
 │   ├── claude-code/CLAUDE.md
 │   ├── opencode/
-│   │   ├── opencode.single.json       ← Single-agent config (one model for all phases)
-│   │   ├── opencode.multi.json        ← Multi-agent config (one model per phase)
-│   │   └── commands/sdd-*.md          ← Slash commands for OpenCode
+│   │   ├── opencode.single.json       ← Ready-to-use config (all agents, default model)
+│   │   ├── opencode.multi.json        ← Template config (all agents, customize model per phase)
+│   │   ├── commands/sdd-*.md          ← Slash commands for OpenCode
+│   │   └── plugins/background-agents.ts ← Async background delegation plugin (both modes)
 │   ├── gemini-cli/GEMINI.md
 │   ├── codex/agents.md
 │   ├── vscode/copilot-instructions.md

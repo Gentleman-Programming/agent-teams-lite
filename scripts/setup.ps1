@@ -360,6 +360,21 @@ function Set-OpenCode {
             Write-Ok "Config created at $configFile ($($script:OpenCodeMode) mode)"
         }
     }
+
+    # Install background-agents plugin
+    $pluginsDir = Join-Path $env:USERPROFILE '.config\opencode\plugins'
+    $pluginSrc = Join-Path $ScriptRoot '..\examples\opencode\plugins\background-agents.ts'
+    New-Item -ItemType Directory -Path $pluginsDir -Force | Out-Null
+    Copy-Item -Path $pluginSrc -Destination (Join-Path $pluginsDir 'background-agents.ts') -Force
+    Write-Ok "background-agents plugin installed -> $pluginsDir"
+    Write-Info "Installing npm dependency: unique-names-generator"
+    Push-Location (Join-Path $env:USERPROFILE '.config\opencode')
+    try {
+        npm install unique-names-generator
+        Write-Ok "unique-names-generator installed"
+    } finally {
+        Pop-Location
+    }
 }
 
 # ============================================================================
