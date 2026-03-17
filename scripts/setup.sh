@@ -193,9 +193,9 @@ install_skills() {
         ok "_shared conventions"
     fi
 
-    # Copy sdd-* + skill-registry
+    # Copy sdd-* + skill-registry + issue-creation + branch-pr
     local count=0
-    for skill_dir in "$SKILLS_SRC"/sdd-*/ "$SKILLS_SRC"/skill-registry/; do
+    for skill_dir in "$SKILLS_SRC"/sdd-*/ "$SKILLS_SRC"/skill-registry/ "$SKILLS_SRC"/issue-creation/ "$SKILLS_SRC"/branch-pr/; do
         [ -d "$skill_dir" ] || continue
         local skill_name
         skill_name=$(basename "$skill_dir")
