@@ -58,7 +58,7 @@ cp -r skills/_shared skills/sdd-* skills/skill-registry ~/.claude/skills/
 
 **2. Add orchestrator to `~/.claude/CLAUDE.md`:**
 
-Append the contents of [`examples/claude-code/CLAUDE.md`](examples/claude-code/CLAUDE.md) to your existing `CLAUDE.md`.
+Append the contents of [`examples/claude-code/CLAUDE.md`](../examples/claude-code/CLAUDE.md) to your existing `CLAUDE.md`.
 
 The example is intentionally lean to avoid token bloat in always-loaded system prompts. Critical engram calls are inlined in each skill file. This keeps your existing assistant identity and adds SDD as an orchestration overlay.
 
@@ -123,8 +123,8 @@ cp examples/opencode/commands/sdd-*.md ~/.config/opencode/commands/
 **2. Add orchestrator agent to `~/.config/opencode/opencode.json`:**
 
 Merge the `agent` block from the config template into your existing config:
-- Single mode: [`examples/opencode/opencode.single.json`](examples/opencode/opencode.single.json)
-- Multi mode: [`examples/opencode/opencode.multi.json`](examples/opencode/opencode.multi.json)
+- Single mode: [`examples/opencode/opencode.single.json`](../examples/opencode/opencode.single.json)
+- Multi mode: [`examples/opencode/opencode.multi.json`](../examples/opencode/opencode.multi.json)
 
 For multi mode, also update the `agent:` field in each subtask command (`sdd-init.md`, `sdd-explore.md`, `sdd-apply.md`, `sdd-verify.md`, `sdd-archive.md`) to point to the corresponding subagent name instead of `sdd-orchestrator`.
 
@@ -153,7 +153,7 @@ cp -r skills/_shared skills/sdd-* skills/skill-registry ~/.gemini/skills/
 
 **2. Add orchestrator to `~/.gemini/GEMINI.md`:**
 
-Append the contents of [`examples/gemini-cli/GEMINI.md`](examples/gemini-cli/GEMINI.md) to your Gemini system prompt file (create it if it doesn't exist).
+Append the contents of [`examples/gemini-cli/GEMINI.md`](../examples/gemini-cli/GEMINI.md) to your Gemini system prompt file (create it if it doesn't exist).
 
 Make sure `GEMINI_SYSTEM_MD=1` is set in `~/.gemini/.env` so Gemini loads the system prompt.
 
@@ -180,7 +180,7 @@ cp -r skills/_shared skills/sdd-* skills/skill-registry ~/.codex/skills/
 
 **2. Add orchestrator instructions:**
 
-Append the contents of [`examples/codex/agents.md`](examples/codex/agents.md) to `~/.codex/agents.md` (or your `model_instructions_file` if configured).
+Append the contents of [`examples/codex/agents.md`](../examples/codex/agents.md) to `~/.codex/agents.md` (or your `model_instructions_file` if configured).
 
 </details>
 
@@ -205,7 +205,7 @@ cp -r skills/_shared skills/sdd-* skills/skill-registry ~/.copilot/skills/
 
 **2. Add orchestrator instructions:**
 
-Create a VS Code `.instructions.md` file in the User prompts folder with the orchestrator from [`examples/vscode/copilot-instructions.md`](examples/vscode/copilot-instructions.md).
+Create a VS Code `.instructions.md` file in the User prompts folder with the orchestrator from [`examples/vscode/copilot-instructions.md`](../examples/vscode/copilot-instructions.md).
 
 Prompt file paths:
 - macOS: `~/Library/Application Support/Code/User/prompts/agent-teams-lite.instructions.md`
@@ -239,7 +239,7 @@ cp -r skills/_shared skills/sdd-* skills/skill-registry .agent/skills/
 
 Add the SDD orchestrator as a global rule in `~/.gemini/GEMINI.md`, or create a workspace rule in `.agent/rules/sdd-orchestrator.md`.
 
-See [`examples/antigravity/sdd-orchestrator.md`](examples/antigravity/sdd-orchestrator.md) for the rule content.
+See [`examples/antigravity/sdd-orchestrator.md`](../examples/antigravity/sdd-orchestrator.md) for the rule content.
 
 **3. Verify:**
 
@@ -268,7 +268,7 @@ cp -r skills/_shared skills/sdd-* skills/skill-registry ./your-project/skills/
 
 **2. Add orchestrator to `.cursorrules`:**
 
-Append the contents of [`examples/cursor/.cursorrules`](examples/cursor/.cursorrules) to your project's `.cursorrules` file.
+Append the contents of [`examples/cursor/.cursorrules`](../examples/cursor/.cursorrules) to your project's `.cursorrules` file.
 
 </details>
 
