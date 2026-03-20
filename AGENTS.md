@@ -14,6 +14,9 @@ When working on this project, load the relevant skill(s) BEFORE writing any code
 | Skill | Trigger | Path |
 |-------|---------|------|
 | `sdd-init` | When initializing SDD in a project, or user says "sdd init". | [`skills/sdd-init/SKILL.md`](skills/sdd-init/SKILL.md) |
+| `sdd-new` | When starting a new SDD change — runs exploration then creates a proposal. | [`skills/sdd-new/SKILL.md`](skills/sdd-new/SKILL.md) |
+| `sdd-continue` | When continuing the next SDD phase in the dependency chain for an active change. | [`skills/sdd-continue/SKILL.md`](skills/sdd-continue/SKILL.md) |
+| `sdd-ff` | When fast-forwarding all SDD planning phases — proposal through tasks. | [`skills/sdd-ff/SKILL.md`](skills/sdd-ff/SKILL.md) |
 | `sdd-explore` | When thinking through a feature, investigating the codebase, or clarifying requirements. | [`skills/sdd-explore/SKILL.md`](skills/sdd-explore/SKILL.md) |
 | `sdd-propose` | When creating or updating a change proposal with intent, scope, and approach. | [`skills/sdd-propose/SKILL.md`](skills/sdd-propose/SKILL.md) |
 | `sdd-spec` | When writing or updating specifications with requirements and scenarios. | [`skills/sdd-spec/SKILL.md`](skills/sdd-spec/SKILL.md) |
