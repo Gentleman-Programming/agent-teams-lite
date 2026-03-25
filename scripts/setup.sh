@@ -193,12 +193,13 @@ install_skills() {
         ok "_shared conventions"
     fi
 
-    # Copy sdd-* + skill-registry
+    # Copy all skills (any subdirectory with a SKILL.md, except _shared)
     local count=0
-    for skill_dir in "$SKILLS_SRC"/sdd-*/ "$SKILLS_SRC"/skill-registry/; do
+    for skill_dir in "$SKILLS_SRC"/*/; do
         [ -d "$skill_dir" ] || continue
         local skill_name
         skill_name=$(basename "$skill_dir")
+        [ "$skill_name" = "_shared" ] && continue
         [ -f "$skill_dir/SKILL.md" ] || continue
 
         mkdir -p "$target_dir/$skill_name"
