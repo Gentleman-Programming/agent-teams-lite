@@ -13,23 +13,17 @@ metadata:
 
 You are a sub-agent responsible for initializing the Spec-Driven Development (SDD) context in a project. You detect the project stack and conventions, then bootstrap the active persistence backend.
 
+You are an EXECUTOR for this phase, not the orchestrator. Do the initialization work yourself. Do NOT launch sub-agents, do NOT call `delegate` or `task`, and do NOT hand execution back unless you hit a real blocker that must be reported upstream.
+
 ## Execution and Persistence Contract
+
+> **Shared protocol**: Read `skills/_shared/sdd-phase-common.md` **Section C** for the canonical persistence rules (engram save pattern, openspec, hybrid, none).
+
+Phase-specific notes for `sdd-init`:
 
 - If mode is `engram`:
   Do NOT create `openspec/` directory.
-
-  **Save project context**:
-  ```
-  mem_save(
-    title: "sdd-init/{project-name}",
-    topic_key: "sdd-init/{project-name}",
-    type: "architecture",
-    project: "{project-name}",
-    content: "{detected project context markdown}"
-  )
-  ```
-  `topic_key` enables upserts — re-running init updates the existing context, not duplicates.
-
+  Use `topic_key: "sdd-init/{project-name}"` and `title: "sdd-init/{project-name}"` (upsert — re-running init updates, not duplicates).
   (See `skills/_shared/engram-convention.md` for full naming conventions.)
 - If mode is `openspec`: Read and follow `skills/_shared/openspec-convention.md`. Run full bootstrap.
 - If mode is `hybrid`: Read and follow BOTH convention files. Run openspec bootstrap AND persist context to Engram.
@@ -96,6 +90,8 @@ rules:
 
 ### Step 4: Build Skill Registry
 
+> **Shared protocol**: Read `skills/_shared/sdd-phase-common.md` **Section A** for the canonical skill-loading procedure.
+
 Follow the same logic as the `skill-registry` skill (`skills/skill-registry/SKILL.md`):
 
 1. Scan user skills: glob `*/SKILL.md` across ALL known skill directories. **User-level**: `~/.claude/skills/`, `~/.config/opencode/skills/`, `~/.gemini/skills/`, `~/.cursor/skills/`, `~/.copilot/skills/`, parent of this skill file. **Project-level**: `.claude/skills/`, `.gemini/skills/`, `.agent/skills/`, `skills/`. Skip `sdd-*`, `_shared`, `skill-registry`. Deduplicate by name (project-level wins). Read frontmatter triggers.
@@ -108,6 +104,8 @@ See `skills/skill-registry/SKILL.md` for the full registry format and scanning d
 ### Step 5: Persist Project Context
 
 **This step is MANDATORY — do NOT skip it.**
+
+> **Shared protocol**: Follow `skills/_shared/sdd-phase-common.md` **Section C** for persistence mechanics.
 
 If mode is `engram`:
 ```
@@ -125,6 +123,8 @@ If mode is `openspec` or `hybrid`: the config was already written in Step 3.
 If mode is `hybrid`: also call `mem_save` as above (write to BOTH backends).
 
 ### Step 6: Return Summary
+
+> **Shared protocol**: Follow `skills/_shared/sdd-phase-common.md` **Section D** for the required return envelope format.
 
 Return a structured summary adapted to the resolved mode:
 
@@ -190,6 +190,7 @@ Ready for /sdd-explore <topic> or /sdd-new <change-name>.
 
 - NEVER create placeholder spec files - specs are created via sdd-spec during a change
 - ALWAYS detect the real tech stack, don't guess
+- NEVER behave like the orchestrator from this phase - execute directly and return results
 - If the project already has an `openspec/` directory, report what exists and ask the orchestrator if it should be updated
 - Keep config.yaml context CONCISE - no more than 10 lines
 - Return a structured envelope with: `status`, `executive_summary`, `detailed_report` (optional), `artifacts`, `next_recommended`, and `risks`
