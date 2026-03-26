@@ -71,15 +71,20 @@ SDD is the structured planning layer for substantial changes.
 | `none` | Return results inline only. Recommend enabling engram or openspec. |
 
 ### Commands
+
+#### Single-phase skills (invoke via Skill tool)
 - `/sdd-init` -> run `sdd-init`
 - `/sdd-explore <topic>` -> run `sdd-explore`
-- `/sdd-new <change>` -> run `sdd-explore` then `sdd-propose`
-- `/sdd-continue [change]` -> create next missing artifact in dependency chain
-- `/sdd-ff [change]` -> run `sdd-propose` -> `sdd-spec` -> `sdd-design` -> `sdd-tasks`
 - `/sdd-apply [change]` -> run `sdd-apply` in batches
 - `/sdd-verify [change]` -> run `sdd-verify`
 - `/sdd-archive [change]` -> run `sdd-archive`
-- `/sdd-new`, `/sdd-continue`, and `/sdd-ff` are meta-commands handled by YOU (the orchestrator). Do NOT invoke them as skills.
+
+#### Meta-commands (type as text — orchestrator handles directly, NOT skills)
+- `sdd-new <change>` -> orchestrate `sdd-explore` then `sdd-propose` via Task tool
+- `sdd-continue [change]` -> determine next missing artifact and launch it via Task tool
+- `sdd-ff [change]` -> orchestrate `sdd-propose` -> `sdd-spec` -> `sdd-design` -> `sdd-tasks` via Task tool
+
+> **Note:** Meta-commands are composite workflows. The orchestrator processes them by launching sub-agents for each phase — never by invoking the Skill tool. In Claude Code, `/` triggers the Skill tool, so these must be typed as plain text (e.g. `sdd-new my-feature`). If a sub-agent suggests "run /sdd-ff", show it to the user as a suggestion, do not auto-execute.
 
 ### Dependency Graph
 ```
